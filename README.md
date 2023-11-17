@@ -166,4 +166,4 @@ You need to implement the Winograd algorithm of matrix multiplication without us
 - Use mutexes to lock access to data for parallel implementation
 
 
-💡 [Tap here](https://forms.yandex.ru/cloud/64181e44d0468826e3eb4a68/) **to leave your feedback on the project**. Pedago Team really tries to make your educational experience better.
+💡 [Tap here](https://forms.yandex.ru/cloud/64181e44d0468826e3eb4a68/) **to leave your feedback on the project**. Product Team really tries to make your educational experience better.
