@@ -1,19 +1,24 @@
+#include <iostream>
+#include <cmath>
+
 #include "ant.h"
 
 
 namespace s21 {
 
 Ant::Ant(const Graph &distances, std::mt19937 &gen, double pheromone_amount) 
-    : graph_(graph), gen_(gen), pheromone_amount_(pheromone_amount),
-    used_vertex_(std::vector<bool>(distances.GetSize(), false)) {
+    : distances_(distances),
+      gen_(gen),
+      pheromone_amount_(pheromone_amount),
+      used_vertex_(std::vector<bool>(distances.GetSize(), false)) {
     std::uniform_int_distribution<size_t> dist{0, distances.GetSize() - 1};
-    size_t start_vetex = dist(gen_);
-    path_.vertices.push_back();
+    size_t start_vertex = dist(gen_);
+    path_.vertices.push_back(start_vertex);
     path_.distance = 0;
-    used_vertex_[start_vetex] = true;
+    used_vertex_[start_vertex] = true;
 }
 
-TsmResult &Ant::GetPath() const {
+const TsmResult &Ant::GetPath() const {
     return path_;
 }
 
@@ -29,14 +34,14 @@ bool Ant::Move(const Pheromone &pheromones) {
     }
 
     if (neighbors.empty()) {
-        return false
+        return false;
     }
 
     std::vector<double> probabilities = GetProbabilities(pheromones, neighbors);
     double probability = GetRandomProbability();
-
+    
     for (size_t i = 0; i < probabilities.size(); ++i) {
-        if (probability <= pheromones[i]) {
+        if (probability <= probabilities[i]) {
             path_.distance += GetDistance(GetLastVertex(), neighbors[i]);
             path_.vertices.push_back(neighbors[i]);
             used_vertex_[neighbors[i]] = true;
@@ -48,9 +53,9 @@ bool Ant::Move(const Pheromone &pheromones) {
 }
 
 double Ant::GetDistance(size_t from, size_t to) const {
-    size_t distance = graph_.GetValue(from, to);
+    size_t distance = distances_.GetValue(from, to);
     if (distance == 0 && from != to) {
-        return std::numeric_limits<double>::max();
+        return std::numeric_limits<double>::infinity();
     }
 
     return static_cast<double>(distance);
@@ -67,13 +72,11 @@ size_t Ant::GetLastVertex() {
 std::vector<double> Ant::GetProbabilities(const Pheromone &pheromones, const std::vector<size_t> &neighbors) {
     std::vector<double> probabilities;
     probabilities.reserve(neighbors.size());
-    double summary_weight = CalcSummaryWeight(pheromone, neighbors);
 
     size_t from = GetLastVertex();
+    double summary_weight = CalcSummaryWeight(pheromones, neighbors);
     for (auto &neighbor : neighbors) {
-        double probability = pow(kDistance / GetDistance(from, neighbor), kBetta) *
-            pow(GetDistance(from, neighbor), kAlpha) /
-            summary_weight;
+        double probability = pow(kDistance / GetDistance(from, neighbor), kBetta) * pow(pheromones.GetValue(from, neighbor), kAlpha) / summary_weight;
 
         if (probabilities.empty()) {
             probabilities.push_back(probability);
@@ -94,7 +97,7 @@ double Ant::GetRandomProbability() {
 std::vector<size_t> Ant::GetPossibleNeighbors() {
     size_t from = GetLastVertex();
     std::vector<size_t> possible_neighbors;
-    for (size_t to = 0; to < graph_.GetSize(); ++to) {
+    for (size_t to = 0; to < distances_.GetSize(); ++to) {
         if (from != to && !used_vertex_[to] && !std::isinf(GetDistance(from, to))) {
             possible_neighbors.push_back(to);
         }
@@ -105,12 +108,10 @@ std::vector<size_t> Ant::GetPossibleNeighbors() {
 
 double Ant::CalcSummaryWeight(const Pheromone &pheromones, const std::vector<size_t> &neighbors) {
     size_t from = GetLastVertex();
-    double summary_weight = std::accumulatt(
+    double summary_weight = std::accumulate(
         neighbors.begin(), neighbors.end(), 0.0,
         [&](double acc, const auto &neighbor) {
-            return acc
-                + pow(kDistance / GetDistance(from, neighbor), kBetta)
-                * pow(GetDistance(from, neighbor), kAlpha);
+            return acc + pow(kDistance / GetDistance(from, neighbor), kBetta) * pow(pheromones.GetValue(from, neighbor), kAlpha);
         }
     );
 

@@ -12,17 +12,21 @@ namespace s21 {
 
 class Ant {
 public:
+    const double kAlpha = 1;
+    const double kBetta = 1;
+    const double kDistance = 1;
+
     Ant(const Graph &distances, std::mt19937 &gen, double pheromone_amount);
 
-    TsmResult &GetPath() const;
+    const TsmResult &GetPath() const;
     double GetPheromoneAmount() const;
-    bool Move(const Pheromone &pheromones)
+    bool Move(const Pheromone &pheromones);
 
 private:
     Graph distances_;
     std::mt19937 &gen_;
     double pheromone_amount_;
-    std::vector<size_t> used_vertex_;
+    std::vector<bool> used_vertex_;
     TsmResult path_{};
 
     double GetDistance(size_t from, size_t to) const;

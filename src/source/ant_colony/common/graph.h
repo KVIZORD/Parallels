@@ -2,6 +2,9 @@
 #define PARALLELS_SOURCE_ANT_COLONY_COMMON_GRAPH_H
 
 #include <vector>
+#include <cstddef>
+#include <stdexcept>
+#include <iostream>
 
 
 namespace s21 {
@@ -19,6 +22,8 @@ public:
     size_t GetSize() const;
     size_t GetValue(size_t from, size_t to) const;
     void SetValue(size_t from, size_t to, size_t value);
+
+    void Print() const;
 
 private:
     MatrixAdjacency matrix_;

@@ -2,6 +2,7 @@
 #define PARALLELS_SOURCE_ANT_COLONY_COMMON_PATH_STRUCTURE_H
 
 #include <vector>
+#include <cstddef>
 
 namespace s21 {
 

@@ -1,11 +1,12 @@
 #include "graph.h"
 
+namespace s21 {
 
-explicit Graph::Graph(size_t size) 
+Graph::Graph(size_t size) 
     : matrix_(MatrixAdjacency(size, std::vector<size_t>(size, size_t{}))), size_(size) {
 }
 
-explicit Graph::Graph(size_t size, size_t init_value) 
+Graph::Graph(size_t size, size_t init_value) 
     : matrix_(MatrixAdjacency(size, std::vector<size_t>(size, init_value))), size_(size) {
 }
 
@@ -41,9 +42,19 @@ void Graph::SetValue(size_t from, size_t to, size_t value) {
 }
 
 bool Graph::IsSquare(const MatrixAdjacency &matrix) {
-    size_t rows = matrix_.size();
-    size_t cols = matrix_.empty() ? 0 : matrix_[0].size();
+    size_t rows = matrix.size();
+    size_t cols = matrix.empty() ? 0 : matrix[0].size();
     return rows == cols;
 }
 
+void Graph::Print() const {
+    std::cout << "Matrix distances: " << std::endl;
+    for (size_t i = 0; i < matrix_.size(); ++i) {
+        for (size_t j = 0; j < matrix_.size(); ++j) {
+            std::cout << matrix_[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+}
 
+}  // namespace s21
