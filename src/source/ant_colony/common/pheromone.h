@@ -3,6 +3,7 @@
 
 #include <vector>
 
+#include "tsm_result.h"
 
 namespace s21 {
 
