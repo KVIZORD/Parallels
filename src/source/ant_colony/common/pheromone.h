@@ -1,5 +1,5 @@
-#ifndef PARALLERS_SOURCE_ANT_COLONY_COMMON_PHEROMONE_H
-#define PARALLERS_SOURCE_ANT_COLONY_COMMON_PHEROMONE_H
+#ifndef PARALLELS_SOURCE_ANT_COLONY_COMMON_PHEROMONE_H
+#define PARALLELS_SOURCE_ANT_COLONY_COMMON_PHEROMONE_H
 
 #include <vector>
 
@@ -17,9 +17,9 @@ private:
     double evaporation_rate_;
 
     void Evapration();
-    void Lay(const std:vector<size_t> &path, double average_pheromone);
+    void Lay(const std:vector<size_t> &path_vertices, double average_pheromone);
 };
 
 }  // namespace s21
 
-#endif  // PARALLERS_SOURCE_ANT_COLONY_COMMON_PHEROMONE_H
+#endif  // PARALLELS_SOURCE_ANT_COLONY_COMMON_PHEROMONE_H

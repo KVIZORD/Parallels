@@ -17,7 +17,7 @@ double Pheromone::GetValue(size_t from, size_t to) const {
 void Pheromone::Update(const TsmResult &path, double pheromon_amount) {
     double average_pheromone = pheromon_amount / path.distance;
     Evapration();
-    Lay(path.path, average_pheromone);
+    Lay(path.vertices, average_pheromone);
 }
 
 void Pheromone::Evapration() {
@@ -28,10 +28,10 @@ void Pheromone::Evapration() {
     }
 }
 
-void Pheromone::Lay(const std:vector<size_t> &path, double average_pheromone) {
-    for (size_t i = 0; (i + 1) < path.size(); ++i) {
-        size_t from = path[i];
-        size_t to = path[i + 1];
+void Pheromone::Lay(const std:vector<size_t> &path_vertices, double average_pheromone) {
+    for (size_t i = 0; (i + 1) < path_vertices.size(); ++i) {
+        size_t from = path_vertices[i];
+        size_t to = path_vertices[i + 1];
         pheromone_matrix_[from][to] += average_pheromone;
         pheromone_matrix_[to][from] += average_pheromone;
     }
