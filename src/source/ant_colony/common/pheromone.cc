@@ -14,8 +14,8 @@ double Pheromone::GetValue(size_t from, size_t to) const {
     return pheromone_matrix_[from][to];
 }
 
-void Pheromone::Update(const TsmResult &path, double pheromon_amount) {
-    double average_pheromone = pheromon_amount / path.distance;
+void Pheromone::Update(const TsmResult &path, double pheromone_amount) {
+    double average_pheromone = pheromone_amount / path.distance;
     Evapration();
     Lay(path.vertices, average_pheromone);
 }

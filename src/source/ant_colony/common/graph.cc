@@ -27,6 +27,10 @@ Graph::Graph(MatrixAdjacency &&matrix) {
     size_ = matrix_.size();
 }
 
+size_t Graph::GetSize() const {
+    return size_;
+}
+
 size_t Graph::GetValue(size_t from, size_t to) const {
     return matrix_[from][to];
 }

@@ -3,6 +3,9 @@
 
 #include <vector>
 
+
+namespace s21 {
+
 class Graph {
 public:
     using MatrixAdjacency = std::vector<std::vector<size_t>>;
@@ -13,6 +16,7 @@ public:
     Graph(const MatrixAdjacency &matrix);
     Graph(MatrixAdjacency &&matrix);
 
+    size_t GetSize() const;
     size_t GetValue(size_t from, size_t to) const;
     void SetValue(size_t from, size_t to, size_t value);
 
@@ -21,10 +25,8 @@ private:
     size_t size_;
 
     bool IsSquare(const MatrixAdjacency &matrix);
+};
+
 }
 
 #endif  // PARALLELS_SOURCE_ANT_COLONY_COMMON_ANT_H
-
-
-
-

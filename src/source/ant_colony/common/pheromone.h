@@ -11,7 +11,7 @@ class Pheromone {
 public:
     Pheromone(size_t size, double init_pheromone, double evaporation_rate);
     double GetValue(size_t from, size_t to) const;
-    void Update(const TsmResult &path, double pheromon_amount);
+    void Update(const TsmResult &path, double pheromone_amount);
 
 private:
     std::vector<std::vector<double>> pheromone_matrix_;
