@@ -1,14 +1,14 @@
 #include "iostream"
 
-#include "ant_colony.h"
+#include "sync_ant_colony.h"
 
 
 namespace s21 {
 
-AntColony::AntColony(Graph &graph, size_t count_colony, size_t size_colony)
+AntColonySync::AntColonySync(Graph &graph, size_t count_colony, size_t size_colony)
     : graph_(graph), count_colony_(count_colony), size_colony_(size_colony) {}
 
-TsmResult AntColony::Solve() {
+TsmResult AntColonySync::Solve() {
   TsmResult min_path;
   min_path.distance = std::numeric_limits<double>::infinity();
   if (graph_.GetSize() == 0) {
@@ -36,7 +36,7 @@ TsmResult AntColony::Solve() {
   return min_path;
 }
 
-void AntColony::CreateAntColony() {
+void AntColonySync::CreateAntColony() {
     ant_colony.clear();
     ant_colony.reserve(size_colony_);
     for (size_t i = 0; i < size_colony_; ++i) {

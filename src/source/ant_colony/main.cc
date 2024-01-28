@@ -1,9 +1,12 @@
+
 #include <vector>
 #include <iostream>
 
-#include "sync_solution/ant_colony.h"
+#include "async_solution/async_ant_colony.h"
+#include "sync_solution/sync_ant_colony.h"
 #include "common/graph.h"
 #include "common/path_structure.h"
+#include "common/ant_colony.h"
 
 
 int main() {
@@ -22,10 +25,15 @@ int main() {
     };
 
     s21::Graph graph(matrix);
-    s21::AntColony colony(graph, 1, 1000);
-    s21::TsmResult res = colony.Solve();
 
+    s21::AntColonySync colony(graph, 1, 200000);
+    s21::TsmResult res = colony.Solve();
     std::cout << res.distance << std::endl;
 
+    s21::AntColonyAsync colony_async(graph, 1, 200000);
+    s21::TsmResult res_async = colony_async.Solve();
+    std::cout << res_async.distance << std::endl;
+
+    std::cout << "Hello World!" << std::endl;
     return 0;
 }
