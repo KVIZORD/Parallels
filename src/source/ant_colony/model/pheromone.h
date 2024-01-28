@@ -1,11 +1,11 @@
-#ifndef PARALLELS_SOURCE_ANT_COLONY_COMMON_PHEROMONE_H
-#define PARALLELS_SOURCE_ANT_COLONY_COMMON_PHEROMONE_H
+#ifndef PARALLELS_SOURCE_ANT_COLONY_MODEL_PHEROMONE_H
+#define PARALLELS_SOURCE_ANT_COLONY_MODEL_PHEROMONE_H
 
 #include <vector>
 #include <cstddef>
 #include <iostream>
 
-#include "./path_structure.h"
+#include "tsm_result.h"
 
 namespace s21 {
 
@@ -27,4 +27,4 @@ private:
 
 }  // namespace s21
 
-#endif  // PARALLELS_SOURCE_ANT_COLONY_COMMON_PHEROMONE_H
+#endif  // PARALLELS_SOURCE_ANT_COLONY_MODEL_PHEROMONE_H

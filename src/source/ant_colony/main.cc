@@ -2,11 +2,10 @@
 #include <vector>
 #include <iostream>
 
-#include "async_solution/async_ant_colony.h"
-#include "sync_solution/sync_ant_colony.h"
-#include "common/graph.h"
-#include "common/path_structure.h"
-#include "common/ant_colony.h"
+#include "model/ant_colony_async.h"
+#include "model/ant_colony_sync.h"
+#include "model/graph.h"
+#include "model/tsm_result.h"
 
 
 int main() {

@@ -1,11 +1,11 @@
-#ifndef PARALLELS_SOURCE_ANT_COLONY_COMMON_ANT_H
-#define PARALLELS_SOURCE_ANT_COLONY_COMMON_ANT_H
+#ifndef PARALLELS_SOURCE_ANT_COLONY_MODEL_ANT_H
+#define PARALLELS_SOURCE_ANT_COLONY_MODEL_ANT_H
 
 #include <vector>
 #include <random>
 
 #include "graph.h"
-#include "path_structure.h"
+#include "tsm_result.h"
 #include "pheromone.h"
 
 namespace s21 {
@@ -41,4 +41,4 @@ private:
 
 }
 
-#endif  // PARALLELS_SOURCE_ANT_COLONY_COMMON_ANT_H
+#endif  // PARALLELS_SOURCE_ANT_COLONY_MODEL_ANT_H
