@@ -6,9 +6,10 @@
 #include <random>
 #include <thread>
 #include <mutex>
-#include <condition_variable>
-#include <atomic>
-#include <future>
+// #include <condition_variable>
+// #include <atomic>
+// #include <future>
+#include <shared_mutex>
 
 
 #include "../common/graph.h"
@@ -27,7 +28,6 @@ public:
     AntColonyAsync(Graph &graph, size_t count_colony, size_t size_colony);
     ~AntColonyAsync();
     TsmResult Solve();
-    
 
 private:
     Graph &graph_;
@@ -37,24 +37,11 @@ private:
     std::queue<Ant> ant_queue{};
     std::random_device rd_{};
     std::mt19937 gen_{rd_()};
-    // Pheromone &pheromone_;
-    // Pheromone pheromones_;
-    // TsmResult min_path;
-
-
-    // std::vector<std::thread> threads_;
     std::mutex mutex_;
-    // std::mutex mutex_pheromones_;
-    // std::mutex mutex_queue_;
-    // std::condition_variable cv_;
-    // std::atomic<bool> started_{true};
 
-    // void CreateAntColony();
-    // void Run();
-    // void Task(Ant &ant, Pheromone &pheromones, TsmResult &min_path);
     TsmResult Task(Pheromone &pheromones, size_t &ant_count, std::mutex &mtx, Graph &graph, std::mt19937 &gen, double kPheromoneQuantity);
-
-    
+    void ThreadWait(std::vector<std::thread> &threads) const;
+    void UpdateMinPath(TsmResult &min_path, TsmResult &path) const;
 };
 
 }
