@@ -2,13 +2,13 @@
 
 namespace s21 {
 
-Graph::Graph(size_t size) 
-    : matrix_(MatrixAdjacency(size, std::vector<size_t>(size, size_t{}))), size_(size) {
-}
+// Graph::Graph(size_t size) 
+//     : matrix_(MatrixAdjacency(size, std::vector<size_t>(size, size_t{}))), size_(size) {
+// }
 
-Graph::Graph(size_t size, size_t init_value) 
-    : matrix_(MatrixAdjacency(size, std::vector<size_t>(size, init_value))), size_(size) {
-}
+// Graph::Graph(size_t size, size_t init_value) 
+//     : matrix_(MatrixAdjacency(size, std::vector<size_t>(size, init_value))), size_(size) {
+// }
 
 Graph::Graph(const MatrixAdjacency &matrix) {
     if (!IsSquare(matrix)) {
@@ -39,6 +39,15 @@ size_t Graph::GetValue(size_t from, size_t to) const {
 void Graph::SetValue(size_t from, size_t to, size_t value) {
     matrix_[from][to] = value;
     matrix_[to][from] = value;
+}
+
+void Graph::SetMatrix(MatrixAdjacency &&matrix) {
+    if (!IsSquare(matrix)) {
+        throw std::invalid_argument("Matrix is not square");
+    }
+
+    matrix_ = matrix;
+    size_ = matrix_.size();
 }
 
 bool Graph::IsSquare(const MatrixAdjacency &matrix) {
