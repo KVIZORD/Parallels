@@ -15,7 +15,7 @@ OPEN_FILE	= xdg-open
 endif
 
 
-all:
+all: ant
 
 clean:
 	rm -rf $(BUILD_DIR)
