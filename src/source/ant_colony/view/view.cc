@@ -160,13 +160,6 @@ void View::LoadGraphFromFile() {
 
   try {
     Matrix matrix = ReadMatrix(size, in);
-    std::cout << "Matrix loaded." << std::endl;
-    for (long long i = 0; i < size; ++i) {
-      for (long long j = 0; j < size; ++j) {
-        std::cout << matrix[i][j] << " ";
-      }
-      std::cout << std::endl;
-    }
     controller_.UpdateGraph(std::move(matrix));
   } catch (std::invalid_argument &e) {
     std::cout << "\033[1;31mIncorrect matrix. \033[0m" << std::endl;
