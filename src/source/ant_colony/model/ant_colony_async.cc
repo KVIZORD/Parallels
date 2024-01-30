@@ -1,10 +1,10 @@
 #include "ant_colony_async.h"
 
-
 namespace s21 {
 
-AntColonyAsync::AntColonyAsync(Graph &graph, size_t count_colony, size_t size_colony) : AntColonyBase(graph, count_colony, size_colony) {
-}
+AntColonyAsync::AntColonyAsync(Graph &graph, size_t count_colony,
+                               size_t size_colony)
+    : AntColonyBase(graph, count_colony, size_colony) {}
 
 TsmResult AntColonyAsync::Solve() {
   TsmResult min_path;
@@ -16,12 +16,14 @@ TsmResult AntColonyAsync::Solve() {
   for (size_t i = 0; i < count_colony_; ++i) {
     size_t ant_count = size_colony_;
     std::vector<std::thread> threads;
-    Pheromone pheromones(graph_.GetSize(), kPheromonInitialLevel, kPheromoneEvaporationRate);
+    Pheromone pheromones(graph_.GetSize(), kPheromonInitialLevel,
+                         kPheromoneEvaporationRate);
 
     for (size_t i = 0; i < std::thread::hardware_concurrency(); ++i) {
       threads.push_back(std::thread([&]() {
-          TsmResult path = Task(pheromones, ant_count);
-          UpdateMinPath(min_path, path);
+        TsmResult path = Task(pheromones, ant_count);
+        std::scoped_lock lock(mtx_cnt_);
+        UpdateMinPath(min_path, path);
       }));
     }
 
