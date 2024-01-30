@@ -19,7 +19,7 @@ namespace s21 {
 class AntColonyAsync : public AntColonyBase {
  public:
   AntColonyAsync(Graph &graph, size_t count_colony, size_t size_colony);
-  TsmResult Solve();
+  TsmResult Solve() override;
 
  private:
   std::mutex mtx_cnt_;

@@ -1,5 +1,5 @@
 BUILD_DIR = build
-# TEST_EXE = SimpleNavigatorTests
+TEST_EXE = ParallelsTests
 REPORT_FLAG =
 
 OS = $(shell uname -s)
@@ -26,3 +26,26 @@ ant: build
 
 build:
 	CC=gcc CXX=g++ cmake -B $(BUILD_DIR) 
+
+test: build
+	cmake --build $(BUILD_DIR) --target $(TEST_EXE)
+	./$(BUILD_DIR)/tests/$(TEST_EXE)
+
+leaks: test
+	$(MEMORY_TEST) $(BUILD_DIR)/tests/$(TEST_EXE) --gtest_filter=-*.*Throw* --gtest_filter=-*.*NoCheckLeaks*
+
+report: build
+	cmake --build $(BUILD_DIR) --target report
+	./$(BUILD_DIR)/tests/report
+	lcov --capture --directory $(BUILD_DIR)/tests/CMakeFiles/report.dir --output-file $(BUILD_DIR)/s21_coverage.info --exclude "/usr/*" --exclude "*build/*" $(REPORT_FLAG)
+	genhtml $(BUILD_DIR)/s21_coverage.info --output-directory s21_lcov_report
+	$(OPEN_FILE) ./s21_lcov_report/index.html
+
+stylecheck: build
+	cmake --build $(BUILD_DIR) --target stylecheck
+
+cppcheck: build
+	cmake --build $(BUILD_DIR) --target cppcheck
+
+format: build
+	cmake --build $(BUILD_DIR) --target format

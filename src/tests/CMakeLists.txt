@@ -15,7 +15,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 enable_testing()
-add_executable(${PROJECT_NAME} ${TEST_SOURCES} ${ANT_COLONY_SOURCE})
+add_executable(${PROJECT_NAME} ${TEST_SOURCES} ${ANT_COLONY_MODEL})
 target_link_libraries(${PROJECT_NAME} GTest::gtest_main)
 target_include_directories(${PROJECT_NAME} PUBLIC ${RELATIVE_HEADER_DIR})
 
@@ -29,7 +29,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --coverage")
 
-add_executable(report ${TEST_SOURCES} ${ANT_COLONY_SOURCE})
+add_executable(report ${TEST_SOURCES} ${ANT_COLONY_MODEL})
 target_link_libraries(report GTest::gtest_main)
 target_include_directories(report PUBLIC ${RELATIVE_HEADER_DIR})
 

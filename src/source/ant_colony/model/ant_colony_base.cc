@@ -6,7 +6,7 @@ AntColonyBase::AntColonyBase(Graph &graph, size_t count_colony,
                              size_t size_colony)
     : graph_(graph), count_colony_(count_colony), size_colony_(size_colony) {}
 
-TsmResult AntColonyBase::TravelsAnt(Ant &ant, Pheromone &pheromones) {
+TsmResult AntColonyBase::TravelsAnt(Ant &ant, const Pheromone &pheromones) {
   while (ant.Move(pheromones)) {
   }
 

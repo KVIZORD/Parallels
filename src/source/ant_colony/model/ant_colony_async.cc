@@ -19,7 +19,7 @@ TsmResult AntColonyAsync::Solve() {
     Pheromone pheromones(graph_.GetSize(), kPheromonInitialLevel,
                          kPheromoneEvaporationRate);
 
-    for (size_t i = 0; i < std::thread::hardware_concurrency(); ++i) {
+    for (size_t j = 0; j < std::thread::hardware_concurrency(); ++j) {
       threads.push_back(std::thread([&]() {
         TsmResult path = Task(pheromones, ant_count);
         std::scoped_lock lock(mtx_cnt_);

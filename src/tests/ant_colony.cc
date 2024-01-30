@@ -4,13 +4,22 @@
 #include "../source/ant_colony/model/ant_colony_async.h"
 
 
-const std::vector<std::vector<size_t>> kMatrix_0_0{};
-const std::vector<std::vector<size_t>> kMatrix_1_1{{0}};
-const std::vector<std::vector<size_t>> kMatrix_2_2{
+std::vector<std::vector<size_t>> kMatrix_0_0{};
+std::vector<std::vector<size_t>> kMatrix_1_1{{0}};
+std::vector<std::vector<size_t>> kMatrix_2_2{
   {0, 2},
   {2, 0}
 };
-const std::vector<std::vector<size_t>> kMatrix_11_11{
+std::vector<std::vector<size_t>> kMatrix_3_2{
+  {0, 2},
+  {2, 0},
+  {1, 5}
+};
+std::vector<std::vector<size_t>> kMatrix_2_3{
+  {0, 2, 3},
+  {2, 0, 4},
+};
+std::vector<std::vector<size_t>> kMatrix_11_11{
   {0,   29,  20,  21,  16,  31,  100, 12,  4,   31,  18},
   {29,  0,   15,  29,  28,  40,  72,  21,  29,  41,  12},
   {20,  15,  0,   15,  14,  25,  81,  9,   23,  27,  13},
@@ -23,7 +32,7 @@ const std::vector<std::vector<size_t>> kMatrix_11_11{
   {31,  41,  27,  13,  16,  3,   99,  25,  35,  0,   38},
   {18,  12,  13,  25,  22,  37,  84,  13,  18,  38,  0}
 };
-const std::vector<std::vector<size_t>> kMatrixNoSolution{
+std::vector<std::vector<size_t>> kMatrixNoSolution{
   {0,   29,  20,  21,  16,  1,   100, 12,  4,   31,  18},
   {29,  0,   15,  29,  28,  0,   72,  21,  29,  41,  12},
   {20,  15,  0,   15,  14,  0,   81,  9,   23,  27,  13},
@@ -65,6 +74,16 @@ TEST(AntColonySyncTest, TwoVertexGraph) {
 
   ASSERT_EQ(result.vertices.size(), graph.GetSize() + 1);
   ASSERT_EQ(result.distance, 4);
+
+}
+
+TEST(AntColonySyncTest, NotSquareGraph) {
+  ASSERT_THROW(s21::Graph graph(kMatrix_3_2), std::invalid_argument);
+}
+
+TEST(AntColonySyncTest, SetNotSquareGraph) {
+  s21::Graph graph;
+  ASSERT_THROW(graph.SetMatrix(std::move(kMatrix_2_3)), std::invalid_argument);
 }
 
 TEST(AntColonySyncTest, NoSolutionGraph) {
@@ -110,12 +129,16 @@ TEST(AntColonyAyncTest, SingleVertexGraph) {
 }
 
 TEST(AntColonyAsyncTest, TwoVertexGraph) {
-  s21::Graph graph(kMatrix_2_2);
+  s21::Graph graph(std::move(kMatrix_2_2));
   s21::AntColonyAsync ant_colony(graph, count_colony, size_colony);
   s21::TsmResult result = ant_colony.Solve();
 
   ASSERT_EQ(result.vertices.size(), graph.GetSize() + 1);
   ASSERT_EQ(result.distance, 4);
+}
+
+TEST(AntColonyAsyncTest, NotSquareGraph) {
+  ASSERT_THROW(s21::Graph graph(std::move(kMatrix_3_2)), std::invalid_argument);
 }
 
 TEST(AntColonyAsyncTest, NoSolutionGraph) {
@@ -127,7 +150,8 @@ TEST(AntColonyAsyncTest, NoSolutionGraph) {
 }
 
 TEST(AntColonyAsyncTest, LargeGraph) {
-  s21::Graph graph(kMatrix_11_11);
+  s21::Graph graph;
+  graph.SetMatrix(std::move(kMatrix_11_11));
   s21::AntColonyAsync ant_colony(graph, count_colony, size_colony);
   s21::TsmResult result = ant_colony.Solve();
 

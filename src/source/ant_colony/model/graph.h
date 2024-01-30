@@ -18,10 +18,7 @@ class Graph {
 
   size_t GetSize() const;
   size_t GetValue(size_t from, size_t to) const;
-  void SetValue(size_t from, size_t to, size_t value);
   void SetMatrix(MatrixAdjacency &&matrix);
-
-  void Print() const;
 
  private:
   MatrixAdjacency matrix_;

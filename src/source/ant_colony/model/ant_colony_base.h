@@ -28,7 +28,7 @@ class AntColonyBase {
   std::random_device rd_{};
   std::mt19937 gen_{rd_()};
 
-  TsmResult TravelsAnt(Ant &ant, Pheromone &pheromones);
+  TsmResult TravelsAnt(Ant &ant, const Pheromone &pheromones);
   void UpdateMinPath(TsmResult &min_path, const TsmResult &path) const;
 };
 

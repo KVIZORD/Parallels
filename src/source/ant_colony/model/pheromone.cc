@@ -40,14 +40,4 @@ void Pheromone::Lay(const std::vector<size_t> &path_vertices,
   }
 }
 
-void Pheromone::Print() const {
-  std::cout << "Matrix pheromones" << std::endl;
-  for (size_t i = 0; i < pheromone_matrix_.size(); ++i) {
-    for (size_t j = 0; j < pheromone_matrix_.size(); ++j) {
-      std::cout << pheromone_matrix_[i][j] << " ";
-    }
-    std::cout << std::endl;
-  }
-}
-
 }  // namespace s21

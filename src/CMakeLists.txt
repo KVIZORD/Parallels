@@ -17,12 +17,15 @@ endif()
 set(BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source)
 set(ANT_COLONY_DIR ${SOURCE_DIR}/ant_colony)
+set(TEST_DIR ${BASE_DIR}/tests)
 
-set(RELATIVE_HEADER_DIR ${BASE_DIR})
+set(RELATIVE_HEADER_DIR ${SOURCE_DIR})
 
 # Sources
 file(GLOB_RECURSE ALL_SOURCES ${SOURCE_DIR}/*.cc ${SOURCE_DIR}/*.h)
+file(GLOB_RECURSE ANT_COLONY_MODEL ${ANT_COLONY_DIR}/model/*.cc)
 file(GLOB_RECURSE ANT_COLONY_SOURCE ${ANT_COLONY_DIR}/*.cc)
+file(GLOB_RECURSE TEST_SOURCES ${TEST_DIR}/*.cc)
 
 add_executable(ant ${ANT_COLONY_SOURCE})
 
@@ -31,6 +34,8 @@ add_custom_target(stylecheck COMMAND clang-format --style=Google -n --verbose ${
 add_custom_target(cppcheck COMMAND cppcheck --language=c++ --enable=all --suppress=unusedFunction --suppress=missingInclude --inconclusive --suppress=functionStatic ${ANT_COLONY_SOURCE})
 
 
-# enable_testing()
-# add_subdirectory(${ANT_COLONY_DIR})
+enable_testing()
+add_subdirectory(${TEST_DIR})
+# add_subdirectory(${SOURCE_DIR})
+
 
