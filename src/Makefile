@@ -19,6 +19,8 @@ all:
 
 clean:
 	rm -rf $(BUILD_DIR)
+	rm -rf s21_lcov_report
+
 
 ant: build
 	cmake --build $(BUILD_DIR) --target ant
