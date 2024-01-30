@@ -70,14 +70,30 @@ void View::OutputSolutionTsm() {
   TsmResult pathSync = RunMultiple(count, TsmSolveMethod::kSync);
   TsmResult pathAsync = RunMultiple(count, TsmSolveMethod::kAsync);
 
-  std::cout << "Shortest path: " << std::endl;
-  std::cout << "\t- synchronously:  " << pathSync.distance << std::endl;
-  std::cout << "\t- asynchronously: " << pathAsync.distance << std::endl;
+  PrintPathResult(pathSync, pathAsync);
+}
+
+void View::PrintPathResult(const TsmResult &path_sync, const TsmResult &path_async) {
+  std::cout << "Shortest path: " << std::endl;  
+  
+  std::cout << "\t- synchronously:  ";
+  if (std::isinf(path_sync.distance)) {
+    std::cout << "not found solution" << std::endl;
+  } else {
+    std::cout << path_sync.distance << std::endl;
+  }
+
+  std::cout << "\t- asynchronously: ";
+  if (std::isinf(path_async.distance)) {
+    std::cout << "not found solution" << std::endl;
+  } else {
+    std::cout << path_async.distance << std::endl;
+  }
 }
 
 TsmResult View::RunMultiple(size_t count, TsmSolveMethod method) {
   TsmResult min_path;
-  min_path.distance = std::numeric_limits<double>::max();
+  min_path.distance = std::numeric_limits<double>::infinity();
   for (size_t i = 0; i < count; i++) {
     TsmResult path = (method == kSync) ? controller_.SolveSyncTsm()
                                        : controller_.SolveAsyncTsm();
@@ -118,7 +134,7 @@ void View::LoadGraphFromConsole() {
   try {
     Matrix matrix = ReadMatrix(size);
     controller_.UpdateGraph(std::move(matrix));
-  } catch (std::runtime_error &e) {
+  } catch (std::invalid_argument &e) {
     std::cout << "\033[1;31mIncorrect matrix. \033[0m" << std::endl;
     return;
   }
@@ -144,8 +160,15 @@ void View::LoadGraphFromFile() {
 
   try {
     Matrix matrix = ReadMatrix(size, in);
+    std::cout << "Matrix loaded." << std::endl;
+    for (long long i = 0; i < size; ++i) {
+      for (long long j = 0; j < size; ++j) {
+        std::cout << matrix[i][j] << " ";
+      }
+      std::cout << std::endl;
+    }
     controller_.UpdateGraph(std::move(matrix));
-  } catch (std::runtime_error &e) {
+  } catch (std::invalid_argument &e) {
     std::cout << "\033[1;31mIncorrect matrix. \033[0m" << std::endl;
     return;
   }
@@ -157,7 +180,7 @@ View::Matrix View::ReadMatrix(size_t size, std::istream &in) {
     for (size_t j = 0; j < size; ++j) {
       long long value = ReadNumber(in);
       if (value < 0) {
-        throw std::runtime_error("Incorrect matrix.");
+        throw std::invalid_argument("Incorrect matrix.");
       }
       matrix[i][j] = static_cast<size_t>(value);
     }

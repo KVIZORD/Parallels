@@ -1,11 +1,11 @@
 #ifndef PARALLELS_SOURCE_ANT_COLONY_CONTROLLER_CONTROLLER_H
 #define PARALLELS_SOURCE_ANT_COLONY_CONTROLLER_CONTROLLER_H
 
-#include "../model/ant_colony_async.h"
-#include "../model/ant_colony_base.h"
-#include "../model/ant_colony_sync.h"
-#include "../model/graph.h"
-#include "../model/tsm_result.h"
+#include "ant_colony/model/ant_colony_async.h"
+#include "ant_colony/model/ant_colony_base.h"
+#include "ant_colony/model/ant_colony_sync.h"
+#include "ant_colony/model/graph.h"
+#include "ant_colony/model/tsm_result.h"
 
 namespace s21 {
 

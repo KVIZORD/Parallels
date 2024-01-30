@@ -9,8 +9,8 @@
 #include <string>
 #include <vector>
 
-#include "../controller/controller.h"
-#include "../model/tsm_result.h"
+#include "ant_colony/controller/controller.h"
+#include "ant_colony/model/tsm_result.h"
 
 namespace s21 {
 
@@ -39,6 +39,7 @@ class View {
   void LoadGraphFromFile();
   std::chrono::milliseconds MeasureTime(std::function<TsmResult()> solve_tsm);
   void OutputSolutionTsm();
+  void PrintPathResult(const TsmResult &path_sync, const TsmResult &path_async);
   std::string ReadLine(std::istream &in = std::cin);
   Matrix ReadMatrix(size_t size, std::istream &in = std::cin);
   long long ReadNumber(std::istream &in = std::cin);

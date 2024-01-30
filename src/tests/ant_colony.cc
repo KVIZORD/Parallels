@@ -1,7 +1,7 @@
 #include "common_tests.h"
-#include "../source/ant_colony/model/graph.h"
-#include "../source/ant_colony/model/ant_colony_sync.h"
-#include "../source/ant_colony/model/ant_colony_async.h"
+#include "ant_colony/model/graph.h"
+#include "ant_colony/model/ant_colony_sync.h"
+#include "ant_colony/model/ant_colony_async.h"
 
 
 std::vector<std::vector<size_t>> kMatrix_0_0{};
