@@ -1,4 +1,6 @@
 #include "s21_view.h"
+#include <mutex>
+#include <thread>
 
 namespace s21 {
 	View::~View() {
@@ -11,15 +13,93 @@ namespace s21 {
 		try {
 			FillMatrix();
 			int iter = CheckCorrectNumberInput("Input number of iteration: ");
+
+
+			//////////////////////////////////////////////////////////////////////////////////////
+			/// Простое умножение
+			//////////////////////////////////////////////////////////////////////////////////////////
 			double time = MulMatrix(iter);
-			std::cout << "Time execution = " << time << " milliseconds\n";
-
-			/*WinogradData data = controller_->GetData();
-
-			data.a.Print();
+			std::cout << "\nTime execution = " << time << " milliseconds\n__________________________\n";
 
 
-			data.b.Print();*/
+			//////////////////////////////////////////////////////////////////////////////////////
+			/// умножение виноград
+ 			//////////////////////////////////////////////////////////////////////////////////////////
+			Matrix temp = controller_->MulMatrixWinograd();
+			temp.Print();
+			const auto start{ std::chrono::system_clock::now() };
+			for (size_t i = 0; i < iter; ++i) {
+				controller_->MulMatrixWinograd();
+			}
+			const auto finish{ std::chrono::system_clock::now() };
+			std::cout << "\nTime execution = " << std::chrono::duration_cast<std::chrono::milliseconds>(finish - start).count() << " milliseconds\n_______________\n";
+
+
+			//////////////////////////////////////////////////////////////////////////////////////
+			/// умножение виноград параллель
+			//////////////////////////////////////////////////////////////////////////////////////////
+			std::cout << "\nInput threads count: ";
+			int threads = CheckCorrectNumberInput("");
+			int sss = iter / threads;
+
+			auto func = [&]() {
+				for (size_t a = 0; a < sss; a++)
+				{
+					controller_->MulMatrixWinograd();
+				}
+				};
+
+			const auto start1{ std::chrono::system_clock::now() };
+			std::vector<std::thread> list;
+			for (size_t a = 0; a < threads; a++)
+			{
+				list.push_back(std::thread(func));
+			}
+
+			for (size_t i = 0; i < list.size(); i++)
+			{
+				list[i].join();
+			}
+			const auto finish1{ std::chrono::system_clock::now() };
+
+			temp.Print();
+			std::cout << "Time execution = " << std::chrono::duration_cast<std::chrono::milliseconds>(finish1 - start1).count() << " milliseconds\n";
+
+
+
+
+			//////////////////////////////////////////////////////////////////////////////////////
+			/// умножение виноград конвеер
+			//////////////////////////////////////////////////////////////////////////////////////////
+
+			auto func1 = [&]() {
+				for (size_t a = 0; a < sss; a++)
+				{
+					controller_->MulMatrixConveyorWinograd();					
+				}
+				};
+			Matrix temp1 = controller_->MulMatrixConveyorWinograd();
+			temp1.Print();
+			
+			std::vector<std::thread> list2;
+			//std::mutex mtx;
+			const auto start2{ std::chrono::system_clock::now() };
+			for (size_t a = 0; a < threads; a++)
+			{
+				list2.push_back(std::thread(func1));
+			}
+
+			for (size_t i = 0; i < list2.size(); i++)
+			{
+				list2[i].join();
+			}
+
+
+			const auto finish2{ std::chrono::system_clock::now() };
+
+			std::cout << "Time execution = " << std::chrono::duration_cast<std::chrono::milliseconds>(finish2 - start2).count() << " milliseconds\n";
+
+
 		}
 		catch (const std::exception& e) {
 			std::cout << e.what();
@@ -39,8 +119,6 @@ namespace s21 {
 		}
 		return input;
 	}
-
-	
 
 	double View::MatrixElementInput() {
 		double input{};
@@ -79,7 +157,7 @@ namespace s21 {
 		Matrix a(row1, col1);
 		for (size_t i = 0; i < row1; ++i) {
 			for (size_t j = 0; j < col1; ++j) {
-				a.SetValue(i, j, MatrixElementInput());
+				a(i, j) = MatrixElementInput();
 			}
 		}
 
@@ -89,7 +167,7 @@ namespace s21 {
 		Matrix b(row2, col2);
 		for (size_t i = 0; i < row2; ++i) {
 			for (size_t j = 0; j < col2; ++j) {
-				b.SetValue(i, j, MatrixElementInput());
+				b(i, j) = MatrixElementInput();
 			}
 		}
 		controller_ = new Controller(a, b);
@@ -108,17 +186,16 @@ namespace s21 {
 
 		controller_ = new Controller(a, b);
 	}
-	
-	
+
+
 	double View::MulMatrix(int iter) {
 		const auto start{ std::chrono::system_clock::now() };
-		for (size_t i = 0; i < iter; ++i){
+		for (size_t i = 0; i < iter; ++i) {
 			controller_->MulMatrix();
 		}
 		const auto finish{ std::chrono::system_clock::now() };
 		Matrix aaa = controller_->MulMatrix();
 		aaa.Print();
-		return std::chrono::duration_cast<std::chrono::milliseconds>(finish - start)
-			.count();
+		return std::chrono::duration_cast<std::chrono::milliseconds>(finish - start).count();
 	}
 }

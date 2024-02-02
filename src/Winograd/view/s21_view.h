@@ -19,8 +19,7 @@ class View
 		void InputFromConsole();
 		void FillRandom();
 		double MulMatrix(int iter);
-		Controller* controller_ = nullptr;
-		
+		Controller* controller_ = nullptr;		
 };
 
 } // namespace s21

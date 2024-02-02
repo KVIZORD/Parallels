@@ -4,16 +4,16 @@
 #include "../model/s21_winograd.h"
 
 namespace s21 {
-	class Controller
-	{
+	class Controller {
 	public:
 		Controller() {};
-		explicit Controller(const Matrix& a, const Matrix& b);
+		Controller(const Matrix& a, const Matrix& b);
 		~Controller();
 		WinogradData GetData();
 		Matrix MulMatrix();
-		void SetData(const Matrix& a, const Matrix& b);
-		//void SetValue(double value);
+		Matrix MulMatrixWinograd();
+		Matrix MulMatrixConveyorWinograd();
+		void SetData(const Matrix& a, const Matrix& b);		
 
 	private:
 		Winograd* model_ = nullptr;

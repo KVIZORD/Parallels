@@ -1,12 +1,11 @@
 #include "s21_matrix.h"
 
-
 namespace s21 {
-	size_t Matrix::GetRows() {
+	size_t Matrix::GetRows() const {
 		return rows_;
 	}
 
-	size_t Matrix::GetColumns() {
+	size_t Matrix::GetColumns() const {
 		return cols_;
 	}
 
@@ -31,6 +30,7 @@ namespace s21 {
 			}
 		}
 	}
+
 	void Matrix::FillFromConsoleMatrix() {
 		for (size_t i = 0; i < rows_; i++) {
 			for (size_t j = 0; j < cols_; j++) {
@@ -40,6 +40,7 @@ namespace s21 {
 			}
 		}
 	}
+
 	Matrix Matrix::MulMatrix(const Matrix& other) {
 		if (cols_ != other.rows_) throw std::exception("Matrices are not compatible");
 		Matrix result(rows_, other.cols_);
@@ -54,6 +55,7 @@ namespace s21 {
 		}		
 		return result;		
 	}
+
 	Matrix& Matrix::operator=(const Matrix& other) {
 		if (this == &other) return *this;
 		rows_ = other.rows_;
@@ -61,7 +63,9 @@ namespace s21 {
 		data_ = other.data_;
 		return *this;
 	}
-	void Matrix::SetValue(size_t row, size_t col, double value)	{
-		data_[row][col] = value;
-	}
+
+	double& Matrix::operator()(size_t row, size_t col) {
+		if (row >= rows_ || col >= cols_) throw std::out_of_range("Incorrect index");
+		return data_[row][col];
+	}	
 }

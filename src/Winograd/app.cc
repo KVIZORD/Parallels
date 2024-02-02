@@ -5,9 +5,3 @@ int main() {
 	view.Run();	
 	return 0;
 }
-
-
-
-
-
-
