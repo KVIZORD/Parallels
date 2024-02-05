@@ -26,7 +26,7 @@ namespace s21 {
 	private:
 		WinogradData data_{};
 		size_t a_rows_{ 0 };
-		size_t a_ñols_{ 0 };
+		size_t a_cols_{ 0 };
 		size_t b_rows_{ 0 };
 		size_t b_cols_{ 0 };
 		Vector RowFactor();

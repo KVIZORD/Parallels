@@ -5,7 +5,7 @@ namespace s21 {
 	Winograd::Winograd(const WinogradData& data) {
 		data_ = data;
 		a_rows_ = data_.a.GetRows();
-		a_ñols_ = data_.a.GetColumns();
+		a_cols_ = data_.a.GetColumns();
 		b_rows_ = data_.b.GetRows();
 		b_cols_ = data_.b.GetColumns();
 	}
@@ -19,12 +19,12 @@ namespace s21 {
 	}
 
 	Matrix Winograd::MulMatrix() {
-		if (a_ñols_ != b_rows_) throw std::exception("Matrices are not compatible");
+		if (a_cols_ != b_rows_) throw std::exception("Matrices are not compatible");
 		Matrix result(a_rows_, b_cols_);
 		for (int i = 0; i < a_rows_; i++) {
 			for (int j = 0; j < b_cols_; j++) {
 				double sum = 0;
-				for (int k = 0; k < a_ñols_; k++) {
+				for (int k = 0; k < a_cols_; k++) {
 					sum += data_.a(i, k) * data_.b(k, j);
 				}
 				result(i, j) = sum;
@@ -35,7 +35,7 @@ namespace s21 {
 
 	Winograd::Vector  Winograd::RowFactor() {
 		Vector rowFactor(a_rows_);
-		size_t d = a_ñols_ / 2;
+		size_t d = a_cols_ / 2;
 		for (size_t i = 0; i < a_rows_; ++i) {
 			rowFactor[i] = data_.a(i, 0) * data_.a(i, 1);
 			for (size_t j = 1; j < d; ++j) {
@@ -47,7 +47,7 @@ namespace s21 {
 
 	Winograd::Vector Winograd::ColumnFactor() {
 		Vector columnFactor(b_cols_);
-		size_t d = a_ñols_ / 2;
+		size_t d = a_cols_ / 2;
 		for (size_t i = 0; i < b_cols_; ++i) {
 			columnFactor[i] = data_.b(0, i) * data_.b(1, i);
 			for (size_t j = 1; j < d; ++j) {
@@ -58,7 +58,7 @@ namespace s21 {
 	}
 
 	void Winograd::CalculateMatrixWinograd(Matrix& result) {
-		size_t d = a_ñols_ / 2;
+		size_t d = a_cols_ / 2;
 		for (size_t i = 0; i < a_rows_; ++i) {
 			for (size_t j = 0; j < b_cols_; ++j) {
 				for (size_t k = 0; k < d; ++k) {
@@ -84,14 +84,14 @@ namespace s21 {
 		for (size_t i = 0; i < a_rows_; ++i) {
 			for (size_t j = 0; j < b_cols_; ++j) {
 				w_mutex.lock();
-				result(i, j) += data_.a(i, a_ñols_ - 1) * data_.b(a_ñols_ - 1, j);
+				result(i, j) += data_.a(i, a_cols_ - 1) * data_.b(a_cols_ - 1, j);
 				w_mutex.unlock();
 			}
 		}
 	}
 
 	Matrix Winograd::MulMatrixWinograd() {
-		if (a_ñols_ != b_rows_) {
+		if (a_cols_ != b_rows_) {
 			throw std::exception("Matrices are not compatible");
 		}
 		Vector rowFactor(RowFactor());
@@ -99,14 +99,14 @@ namespace s21 {
 		Matrix result(a_rows_, b_cols_);
 		CalculateMatrixWinograd(result);
 		AddFactors(rowFactor, columnFactor, result);
-		if (a_ñols_ % 2) {
+		if (a_cols_ % 2) {
 			AddElementsOddMatrix(result);
 		}
 		return result;
 	}
 
 	Matrix Winograd::MulMatrixConveyorWinograd() {
-		if (a_ñols_ != b_rows_) {
+		if (a_cols_ != b_rows_) {
 			throw std::exception("Matrices are not compatible");
 		}
 		Vector rowFactor;
@@ -121,7 +121,7 @@ namespace s21 {
 			}
 		);
 		std::thread t2([&]() {
-			if (a_ñols_ % 2) {
+			if (a_cols_ % 2) {
 				AddElementsOddMatrix(result);
 			}
 			}
