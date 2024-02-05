@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iostream>
+#include <iomanip>
 
 namespace s21 {
 class Matrix {

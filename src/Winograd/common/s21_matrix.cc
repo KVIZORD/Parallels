@@ -16,7 +16,7 @@ namespace s21 {
 	void Matrix::Print() {
 		for (size_t i = 0; i < rows_; i++) {
 			for (size_t j = 0; j < cols_; j++) {
-				std::cout << data_[i][j] << " ";
+				std::cout << std::setw(5) << data_[i][j] << " ";
 			}
 			std::cout << std::endl;
 		}

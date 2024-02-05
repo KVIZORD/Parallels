@@ -4,6 +4,8 @@
 #include <vector>
 #include <iostream>
 #include <mutex>
+#include <condition_variable>
+
 #include "../common/s21_matrix.h"
 #include "../common/s21_winograd_data.h"
 
@@ -23,9 +25,14 @@ namespace s21 {
 
 	private:
 		WinogradData data_{};
+		size_t a_rows_{ 0 };
+		size_t a_ñols_{ 0 };
+		size_t b_rows_{ 0 };
+		size_t b_cols_{ 0 };
 		Vector RowFactor();
 		Vector ColumnFactor();
-		void CalculateMatrixWinograd(Vector rowFactor, Vector columnFactor, Matrix& result);
+		void CalculateMatrixWinograd(Matrix& result);
+		void AddFactors(Vector& rowFactor, Vector& columnFactor, Matrix& result);
 		void AddElementsOddMatrix(Matrix& result);
 	};
 
