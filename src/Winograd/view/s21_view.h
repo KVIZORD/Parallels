@@ -21,9 +21,11 @@ namespace s21 {
 		void InputFromConsole();
 		void FillRandom();
 		void PrintMulMatrix(std::string message, int iter, std::function<Matrix()> operation);
+		void PrintMulMatrixParallel(std::string message, int iter, std::function<Matrix()> operation);
 		void PrintRow(char a, size_t length);
 		void PrintDataMatrix();
 		void PrintResult(Matrix& matrix, Time start, Time finish);
+		std::vector<size_t> IterForThreads(size_t iter, size_t threads);
 	};
 
 } // namespace s21

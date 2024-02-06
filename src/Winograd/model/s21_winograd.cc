@@ -150,6 +150,4 @@ namespace s21 {
 
 		return result;
 	}
-
-
 }
