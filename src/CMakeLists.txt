@@ -17,6 +17,7 @@ endif()
 set(BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source)
 set(ANT_COLONY_DIR ${SOURCE_DIR}/ant_colony)
+set(WINOGRAD_DIR ${SOURCE_DIR}/winograd)
 set(TEST_DIR ${BASE_DIR}/tests)
 
 set(RELATIVE_HEADER_DIR ${SOURCE_DIR})
@@ -26,14 +27,18 @@ message(STATUS "RELATIVE_HEADER_DIR: ${RELATIVE_HEADER_DIR}")
 file(GLOB_RECURSE ALL_SOURCES ${SOURCE_DIR}/*.cc ${SOURCE_DIR}/*.h)
 file(GLOB_RECURSE ANT_COLONY_MODEL ${ANT_COLONY_DIR}/model/*.cc)
 file(GLOB_RECURSE ANT_COLONY_SOURCE ${ANT_COLONY_DIR}/*.cc)
+file(GLOB_RECURSE WINOGRAD_MODEL ${WINOGRAD_DIR}/model/*.cc)
+file(GLOB_RECURSE WINOGRAD_SOURCE ${WINOGRAD_DIR}/*.cc)
 file(GLOB_RECURSE TEST_SOURCES ${TEST_DIR}/*.cc)
 
 add_executable(ant ${ANT_COLONY_SOURCE})
+add_executable(winograd ${WINOGRAD_SOURCE})
 target_include_directories(ant PUBLIC ${RELATIVE_HEADER_DIR})
+target_include_directories(winograd PUBLIC ${RELATIVE_HEADER_DIR})
 
 add_custom_target(format COMMAND clang-format --style=Google -i --verbose ${ALL_SOURCES})
 add_custom_target(stylecheck COMMAND clang-format --style=Google -n --verbose ${ALL_SOURCES})
-add_custom_target(cppcheck COMMAND cppcheck --language=c++ --enable=all --suppress=unusedFunction --suppress=missingInclude --inconclusive --suppress=functionStatic ${ANT_COLONY_SOURCE})
+add_custom_target(cppcheck COMMAND cppcheck --language=c++ --enable=all --suppress=unusedFunction --suppress=missingInclude --inconclusive --suppress=functionStatic ${ANT_COLONY_SOURCE} ${WINOGRAD_SOURCE})
 
 
 enable_testing()
