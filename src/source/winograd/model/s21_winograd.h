@@ -23,6 +23,7 @@ class Winograd {
   void SetData(const WinogradData& data);
   Matrix MulMatrix();
   Matrix MulMatrixWinograd();
+  Matrix MulMatrixParallelWinograd(size_t threads);
   Matrix MulMatrixConveyorWinograd();
 
  private:

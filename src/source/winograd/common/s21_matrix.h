@@ -24,7 +24,7 @@ class Matrix {
   void RandomMatrix();
   void FillFromConsoleMatrix();
   Matrix MulMatrix(const Matrix& other);
-  // Matrix& operator= (const Matrix& other);
+  Matrix& operator= (const Matrix& other);
   double& operator()(size_t row, size_t col);
 
  private:

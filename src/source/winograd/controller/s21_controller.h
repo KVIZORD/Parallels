@@ -14,6 +14,7 @@ class Controller {
   WinogradData GetData() const;
   Matrix MulMatrix();
   Matrix MulMatrixWinograd();
+  Matrix MulMatrixParallelWinograd(size_t threads);
   Matrix MulMatrixConveyorWinograd();
   void SetData(const Matrix& a, const Matrix& b);
 
