@@ -31,26 +31,38 @@ namespace s21 {
 
 	Winograd::Vector Winograd::RowFactor() {
 		Vector row_factor(a_rows_);
-		size_t d = a_cols_ / 2;
 		for (size_t i = 0; i < a_rows_; ++i) {
-			row_factor[i] = data_.a(i, 0) * data_.a(i, 1);
-			for (size_t j = 1; j < d; ++j) {
-				row_factor[i] += data_.a(i, 2 * j) * data_.a(i, 2 * j + 1);
-			}
+			row_factor[i] = RowFactorElement(i);
 		}
 		return row_factor;
+	}
+
+	double Winograd::RowFactorElement(size_t i) {
+		double result = data_.a(i, 0) * data_.a(i, 1);
+		size_t d = a_cols_ / 2;
+		for (size_t j = 1; j < d; ++j) {
+			result += data_.a(i, 2 * j) * data_.a(i, 2 * j + 1);
+		}
+		return result;
 	}
 
 	Winograd::Vector Winograd::ColumnFactor() {
 		Vector column_factor(b_cols_);
 		size_t d = a_cols_ / 2;
 		for (size_t i = 0; i < b_cols_; ++i) {
-			column_factor[i] = data_.b(0, i) * data_.b(1, i);
-			for (size_t j = 1; j < d; ++j) {
-				column_factor[i] += data_.b(2 * j, i) * data_.b(2 * j + 1, i);
-			}
+			column_factor[i] = ColumnFactorElement(i);
 		}
 		return column_factor;
+	}
+
+
+	double Winograd::ColumnFactorElement(size_t i) {
+		double result = data_.b(0, i) * data_.b(1, i);
+		size_t d = a_cols_ / 2;
+		for (size_t j = 1; j < d; ++j) {
+			result += data_.b(2 * j, i) * data_.b(2 * j + 1, i);
+		}
+		return result;
 	}
 
 	void Winograd::CalculateMatrixWinograd(Matrix& result) {
@@ -103,94 +115,91 @@ namespace s21 {
 		return result;
 	}
 
-	Matrix Winograd::MulMatrixParallelWinograd(size_t threads)
-	{
+	Matrix Winograd::MulMatrixParallelWinograd(size_t threads) {
 		std::vector<std::thread> threads_pool;
 		threads_pool.reserve(threads);
 
 		Matrix result(a_rows_, b_cols_);
 		Vector row_factor(a_rows_);
 		Vector column_factor(b_cols_);
-		size_t d = a_cols_ / 2;
+		
 		size_t index_row_factor = 0;
 		size_t index_col_factor = 0;
 		size_t index_row_element = 0;
 		size_t index_col_element = 0;
-		for (size_t i = 0; i < threads; i++) {
+		for (size_t a = 0; a < threads; a++) {
 			threads_pool.emplace_back(std::thread([&]() {
-			//threads_pool[i] =(std::move(std::thread([&]() {
-			
-			while (index_row_factor < a_rows_) {
-					size_t i = 0;
+				size_t i = 0;
+				size_t j = 0;
+				while (true) {
 					{
 						std::unique_lock<std::mutex> lock(w_mutex);
-						i = index_row_factor;
-						++index_row_factor;
+						if (!CheckRawFactorIndex(i, index_row_factor)) break;
 					}
-					row_factor[i] = data_.a(i, 0) * data_.a(i, 1);
-					for (size_t j = 1; j < d; ++j) {
-						row_factor[i] += data_.a(i, 2 * j) * data_.a(i, 2 * j + 1);
-					}
+					row_factor[i] = RowFactorElement(i);
 				}
-				while (index_col_factor < b_cols_) {
-					size_t i = 0;
+				while (true) {
 					{
 						std::unique_lock<std::mutex> lock(w_mutex);
-						i = index_col_factor;
-						++index_col_factor;
+						if (!CheckColumnFactorIndex(i, index_col_factor)) break;
 					}
-					column_factor[i] = data_.b(0, i) * data_.b(1, i);
-					for (size_t j = 1; j < d; ++j) {
-						column_factor[i] += data_.b(2 * j, i) * data_.b(2 * j + 1, i);
-					}
+					column_factor[i] = ColumnFactorElement(i);
 				}
 
-				while (index_row_element < a_rows_) {
-					size_t i = 0;
-					size_t j = 0;
+				while (true) {
 					{
-						//std::unique_lock<std::mutex> lock(w_mutex);
-						w_mutex.lock();
-						if (index_col_element >= b_cols_) {
-							++index_row_element;
-							index_col_element = 0;
-						}
-						i = index_row_element;
-						j = index_col_element;
-						++index_col_element;
-						w_mutex.unlock();
+						std::unique_lock<std::mutex> lock(w_mutex);
+						if (!CheckMatrixIndex(i, j, index_row_element, index_col_element)) break;
 					}
-					result(i, j) = -row_factor[i] - column_factor[j];
-					
-
-					for (size_t k = 0; k < d; ++k) {
-						result(i, j) += (data_.a(i, 2 * k) + data_.b(2 * k + 1, j)) *
-							(data_.a(i, 2 * k + 1) + data_.b(2 * k, j));
-					}
-					if (a_cols_ % 2) {
-						result(i, j) += data_.a(i, a_cols_ - 1) * data_.b(a_cols_ - 1, j);
-					}
+					result(i, j) = CalculateMatrixElement(i, j, row_factor, column_factor);
 				}
 				}));
 		}
-
-		//for (auto& thread : threads_pool) {
-		//	//assert(std::this_thread::get_id() != thread.get_id());
-		//	//trd.join();
-		//	if (thread.joinable())
-		//	thread.join();
-		//}
-
-		/*for (size_t i = 0; i < threads_pool.size(); ++i) {
-			if(threads_pool[i].joinable()) threads_pool[i].join();
-		}*/
-
-		/*threads_pool[0].join();
-		threads_pool[1].join();
-		threads_pool[2].join();
-		threads_pool[3].join();*/
-
+		for (auto& thread : threads_pool) {
+			if (thread.joinable())
+				thread.join();
+		}
 		return result;
+	}
+
+	double Winograd::CalculateMatrixElement(size_t i, size_t j, Vector& row_factor, Vector& column_factor) {
+		size_t d = a_cols_ / 2;		
+		double result = -row_factor[i] - column_factor[j];
+		for (size_t k = 0; k < d; ++k) {
+			result += (data_.a(i, 2 * k) + data_.b(2 * k + 1, j)) *
+				(data_.a(i, 2 * k + 1) + data_.b(2 * k, j));
+		}
+		if (a_cols_ % 2) {
+			result += data_.a(i, a_cols_ - 1) * data_.b(a_cols_ - 1, j);
+		}
+		return result;
+	}
+
+
+	bool Winograd::CheckMatrixIndex(size_t& i, size_t& j, size_t& row, size_t& col) const{
+		if (row >= a_rows_) return false;
+		i = row;
+		j = col;
+		++col;
+		if (col >= b_cols_) {
+			++row;
+			col = 0;
+		}
+		return true;
+	}
+
+	bool Winograd::CheckRawFactorIndex(size_t& i, size_t& row) const {
+		i = row;
+		++row;
+		if (row > a_rows_) return false;
+		return true;
+	}
+
+	bool Winograd::CheckColumnFactorIndex(size_t& i, size_t& col) const {
+		i = col;
+		++col;
+		if (col > b_cols_) return false;
+		return true;
 	}
 
 	Matrix Winograd::MulMatrixConveyorWinograd() {

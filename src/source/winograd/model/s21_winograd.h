@@ -34,10 +34,16 @@ class Winograd {
   size_t b_cols_{0};
   Vector RowFactor();
   Vector ColumnFactor();
+  double RowFactorElement(size_t i);
+  double ColumnFactorElement(size_t i);
   void CalculateMatrixWinograd(Matrix& result);
   void AddFactors(const Vector& rowFactor, const Vector& columnFactor,
                   Matrix& result);
   void AddElementsOddMatrix(Matrix& result);
+  bool CheckMatrixIndex(size_t& i, size_t& j, size_t& row, size_t& col) const;
+  bool CheckRawFactorIndex(size_t& i, size_t& row) const;
+  bool CheckColumnFactorIndex(size_t& i, size_t& col) const;
+  double CalculateMatrixElement(size_t i, size_t j, Vector& row_factor, Vector& column_factor);
 };
 
 }  // namespace s21
