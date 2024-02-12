@@ -63,42 +63,7 @@ namespace s21 {
 			result += data_.b(2 * j, i) * data_.b(2 * j + 1, i);
 		}
 		return result;
-	}
-
-	void Winograd::CalculateMatrixWinograd(Matrix& result) {
-		size_t d = a_cols_ / 2;
-		for (size_t i = 0; i < a_rows_; ++i) {
-			for (size_t j = 0; j < b_cols_; ++j) {
-				for (size_t k = 0; k < d; ++k) {
-					w_mutex.lock();
-					result(i, j) += (data_.a(i, 2 * k) + data_.b(2 * k + 1, j)) *
-						(data_.a(i, 2 * k + 1) + data_.b(2 * k, j));
-					w_mutex.unlock();
-				}
-			}
-		}
-	}
-
-	void Winograd::AddFactors(const Vector& row_factor, const Vector& column_factor,
-		Matrix& result) {
-		for (size_t i = 0; i < a_rows_; ++i) {
-			for (size_t j = 0; j < b_cols_; ++j) {
-				w_mutex.lock();
-				result(i, j) += -row_factor[i] - column_factor[j];
-				w_mutex.unlock();
-			}
-		}
-	}
-
-	void Winograd::AddElementsOddMatrix(Matrix& result) {
-		for (size_t i = 0; i < a_rows_; ++i) {
-			for (size_t j = 0; j < b_cols_; ++j) {
-				w_mutex.lock();
-				result(i, j) += data_.a(i, a_cols_ - 1) * data_.b(a_cols_ - 1, j);
-				w_mutex.unlock();
-			}
-		}
-	}
+	}	
 
 	Matrix Winograd::MulMatrixWinograd() {
 		if (a_cols_ != b_rows_) {
@@ -107,10 +72,10 @@ namespace s21 {
 		Vector row_factor(RowFactor());
 		Vector column_factor(ColumnFactor());
 		Matrix result(a_rows_, b_cols_);
-		CalculateMatrixWinograd(result);
-		AddFactors(row_factor, column_factor, result);
-		if (a_cols_ % 2) {
-			AddElementsOddMatrix(result);
+		for (size_t i = 0; i < a_rows_; ++i) {
+			for (size_t j = 0; j < b_cols_; ++j) {
+				result(i, j) = CalculateMatrixElement(i, j, row_factor, column_factor);
+			}
 		}
 		return result;
 	}
@@ -122,7 +87,7 @@ namespace s21 {
 		Matrix result(a_rows_, b_cols_);
 		Vector row_factor(a_rows_);
 		Vector column_factor(b_cols_);
-		
+
 		size_t index_row_factor = 0;
 		size_t index_col_factor = 0;
 		size_t index_row_element = 0;
@@ -163,7 +128,7 @@ namespace s21 {
 	}
 
 	double Winograd::CalculateMatrixElement(size_t i, size_t j, Vector& row_factor, Vector& column_factor) {
-		size_t d = a_cols_ / 2;		
+		size_t d = a_cols_ / 2;
 		double result = -row_factor[i] - column_factor[j];
 		for (size_t k = 0; k < d; ++k) {
 			result += (data_.a(i, 2 * k) + data_.b(2 * k + 1, j)) *
@@ -176,7 +141,7 @@ namespace s21 {
 	}
 
 
-	bool Winograd::CheckMatrixIndex(size_t& i, size_t& j, size_t& row, size_t& col) const{
+	bool Winograd::CheckMatrixIndex(size_t& i, size_t& j, size_t& row, size_t& col) const {
 		if (row >= a_rows_) return false;
 		i = row;
 		j = col;
@@ -206,40 +171,64 @@ namespace s21 {
 		if (a_cols_ != b_rows_) {
 			throw std::invalid_argument("Matrices are not compatible");
 		}
-		Vector row_factor;
-		Vector column_factor;
+		Vector row_factor(a_rows_);
+		Vector column_factor(b_cols_);
 		Matrix result(a_rows_, b_cols_);
-		std::condition_variable cv;
-		std::mutex m_factors;
-		bool unblock = false;
+		std::condition_variable cv_first_stage;
+		std::condition_variable cv_second_stage;
+		std::queue<size_t> row_index;
+		std::queue<std::pair<size_t, size_t>> element_index;
 
-		std::thread t1([&]() { CalculateMatrixWinograd(result); });
+		std::thread t1([&]() {
+			for (size_t i = 0; i < a_rows_; ++i) {
+				auto rf = RowFactorElement(i);
+				std::unique_lock<std::mutex> ul(w_mutex);
+				row_factor[i] = std::move(rf);
+				row_index.push(i);
+				cv_first_stage.notify_one();
+			}});
+
+		std::mutex third_task;
+		std::atomic counter_t2{ 0 };
+		std::atomic counter_t3{ 0 };
 		std::thread t2([&]() {
-			if (a_cols_ % 2) {
-				AddElementsOddMatrix(result);
-			}
-			});
+			while (true) {
+				auto i = GetFromQueue(row_index, w_mutex, cv_first_stage);
+				for (size_t j = 0; j < b_cols_; ++j) {
+					column_factor[j] = ColumnFactorElement(j);
+					{
+						std::unique_lock<std::mutex> lock(third_task);
+						element_index.push(std::make_pair(i, j));
+						cv_second_stage.notify_one();
+					}
+					++counter_t2;
+				}
+				if (counter_t2 >= a_rows_ * b_cols_) break;
+			}});
 
 		std::thread t3([&]() {
-			std::unique_lock<std::mutex> ul(m_factors);
-			row_factor = RowFactor();
-			column_factor = ColumnFactor();
-			unblock = true;
-			cv.notify_one();
-			});
-
-		std::thread t4([&]() {
-			std::unique_lock<std::mutex> ul(m_factors);
-			cv.wait(ul, [&] { return unblock; });
-			AddFactors(row_factor, column_factor, result);
-			});
+			while (true) {
+				auto index = GetFromQueue(element_index, third_task, cv_second_stage);
+				result(index.first, index.second) = CalculateMatrixElement(index.first, index.second, row_factor, column_factor);
+				if (++counter_t3 >= a_rows_ * b_cols_) break;
+			}});
 
 		t1.join();
 		t2.join();
 		t3.join();
-		t4.join();
-
 		return result;
 	}
+
+	template<typename T> T Winograd::GetFromQueue(std::queue<T>& q, std::mutex& mtx, std::condition_variable& cv) {
+		T result;
+		std::unique_lock<std::mutex> ul(mtx);
+		if (q.empty()) {
+			cv.wait(ul, [&] {return !q.empty(); });
+		}
+		result = q.front();
+		q.pop();
+		return result;
+	}
+
 
 }  // namespace s21

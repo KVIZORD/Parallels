@@ -6,6 +6,7 @@
 #include <mutex>
 #include <thread>
 #include <vector>
+#include <queue>
 
 #include "../common/s21_matrix.h"
 #include "../common/s21_winograd_data.h"
@@ -35,15 +36,13 @@ class Winograd {
   Vector RowFactor();
   Vector ColumnFactor();
   double RowFactorElement(size_t i);
-  double ColumnFactorElement(size_t i);
-  void CalculateMatrixWinograd(Matrix& result);
-  void AddFactors(const Vector& rowFactor, const Vector& columnFactor,
-                  Matrix& result);
-  void AddElementsOddMatrix(Matrix& result);
+  double ColumnFactorElement(size_t i);  
   bool CheckMatrixIndex(size_t& i, size_t& j, size_t& row, size_t& col) const;
   bool CheckRawFactorIndex(size_t& i, size_t& row) const;
   bool CheckColumnFactorIndex(size_t& i, size_t& col) const;
   double CalculateMatrixElement(size_t i, size_t j, Vector& row_factor, Vector& column_factor);
+  template<typename T> T GetFromQueue(std::queue<T>& q, std::mutex& mtx, std::condition_variable& cv);
+
 };
 
 }  // namespace s21
