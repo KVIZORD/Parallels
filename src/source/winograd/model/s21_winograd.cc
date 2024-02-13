@@ -202,8 +202,6 @@ Matrix Winograd::MulMatrixConveyorWinograd() {
         ++counter_t2;
         std::unique_lock<std::mutex> lock(third_task);
         element_index.push(std::make_pair(r, j));
-        // std::cout << "r, c = " << r << "," << j << std::endl;
-        
         cv_second_stage.notify_one();
       }
       column_factor[c] = ColumnFactorElement(c);
@@ -211,7 +209,6 @@ Matrix Winograd::MulMatrixConveyorWinograd() {
         ++counter_t2;
         std::unique_lock<std::mutex> lock(third_task);
         element_index.push(std::make_pair(i, c));
-        // std::cout << "r, c = " << i << "," << c << std::endl;
         cv_second_stage.notify_one();
       }
       ++counter_t2;
@@ -222,7 +219,6 @@ Matrix Winograd::MulMatrixConveyorWinograd() {
       cv_second_stage.notify_one();
       ++c;
       if (counter_t2 >= a_rows_ * b_cols_) break;
-      // if (r  >= a_rows_ && c >= b_cols_) break;
     }
   });
 
