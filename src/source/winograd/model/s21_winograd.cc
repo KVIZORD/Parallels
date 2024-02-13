@@ -79,6 +79,8 @@ Matrix Winograd::MulMatrixWinograd() {
 }
 
 Matrix Winograd::MulMatrixParallelWinograd(size_t threads) {
+  // std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
+  // std::cout << "Number of threads = " << threads << std::endl;
   std::vector<std::thread> threads_pool;
   threads_pool.reserve(threads);
 
@@ -176,14 +178,14 @@ Matrix Winograd::MulMatrixConveyorWinograd() {
   Matrix result(a_rows_, b_cols_);
   std::condition_variable cv_first_stage;
   std::condition_variable cv_second_stage;
-  std::queue<size_t> row_index;
-  std::queue<std::pair<size_t, size_t>> element_index;
+  std::queue<size_t> row_index;                         // очередь для 2 стадии
+  std::queue<std::pair<size_t, size_t>> element_index;  // очередь для 3 стадии
 
   std::thread t1([&]() {
     for (size_t i = 0; i < a_rows_; ++i) {
       auto rf = RowFactorElement(i);
-      std::unique_lock<std::mutex> ul(w_mutex);
       row_factor[i] = std::move(rf);
+      std::unique_lock<std::mutex> ul(w_mutex);
       row_index.push(i);
       cv_first_stage.notify_one();
     }
@@ -192,27 +194,42 @@ Matrix Winograd::MulMatrixConveyorWinograd() {
   std::mutex third_task;
   size_t counter_t2{0};
   size_t counter_t3{0};
+  size_t c = 0;
   std::thread t2([&]() {
     while (true) {
-      auto i = GetFromQueue(row_index, w_mutex, cv_first_stage);
-      for (size_t j = 0; j < b_cols_; ++j) {
-        column_factor[j] = ColumnFactorElement(j);
-        {
-          std::unique_lock<std::mutex> lock(third_task);
-          element_index.push(std::make_pair(i, j));
-          cv_second_stage.notify_one();
-        }
+      auto r = GetFromQueue(row_index, w_mutex, cv_first_stage);
+      for (size_t j = 0; j < c; ++j) {
         ++counter_t2;
+        std::unique_lock<std::mutex> lock(third_task);
+        element_index.push(std::make_pair(r, j));
+        // std::cout << "r, c = " << r << "," << j << std::endl;
+        
+        cv_second_stage.notify_one();
       }
+      column_factor[c] = ColumnFactorElement(c);
+      for (size_t i = 0; i < r; ++i) {
+        ++counter_t2;
+        std::unique_lock<std::mutex> lock(third_task);
+        element_index.push(std::make_pair(i, c));
+        // std::cout << "r, c = " << i << "," << c << std::endl;
+        cv_second_stage.notify_one();
+      }
+      ++counter_t2;
+      {
+        std::unique_lock<std::mutex> lock(third_task);
+        element_index.push(std::make_pair(r, c));
+      }
+      cv_second_stage.notify_one();
+      ++c;
       if (counter_t2 >= a_rows_ * b_cols_) break;
+      // if (r  >= a_rows_ && c >= b_cols_) break;
     }
   });
 
   std::thread t3([&]() {
     while (true) {
       auto index = GetFromQueue(element_index, third_task, cv_second_stage);
-      result(index.first, index.second) = CalculateMatrixElement(
-          index.first, index.second, row_factor, column_factor);
+      result(index.first, index.second) = CalculateMatrixElement(index.first, index.second, row_factor, column_factor);
       if (++counter_t3 >= a_rows_ * b_cols_) break;
     }
   });
@@ -226,12 +243,11 @@ Matrix Winograd::MulMatrixConveyorWinograd() {
 template <typename T>
 T Winograd::GetFromQueue(std::queue<T>& q, std::mutex& mtx,
                          std::condition_variable& cv) {
-  T result;
   std::unique_lock<std::mutex> ul(mtx);
   if (q.empty()) {
-    cv.wait(ul, [&] { return !q.empty(); });
+    cv.wait(ul, [&q] { return !q.empty(); });
   }
-  result = q.front();
+  T result = std::move(q.front());
   q.pop();
   return result;
 }
