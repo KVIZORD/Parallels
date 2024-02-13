@@ -23,8 +23,12 @@ void View::Run() {
     auto operation1 = [this](size_t threads) {
       return controller_->MulMatrixParallelWinograd(threads);
     };
-    MulMatrixParallelManual("Winograd parallel multiply(Manual count of threads)", iter, operation1);
-    MulMatrixParallelCore("Winograd parallel multiply(Number of logical computer processors)", iter, operation1);
+    MulMatrixParallelManual(
+        "Winograd parallel multiply(Manual count of threads)", iter,
+        operation1);
+    MulMatrixParallelCore(
+        "Winograd parallel multiply(Number of logical computer processors)",
+        iter, operation1);
 
     operation = [this]() { return controller_->MulMatrixConveyorWinograd(); };
     PrintMulMatrix("Winograd conveyor parallel multiply", iter, operation);
@@ -158,7 +162,7 @@ void View::PrintMulMatrix(const std::string& message, int iter,
 }
 
 void View::MulMatrixParallelManual(const std::string& message, int iter,
-                                  std::function<Matrix(size_t)> operation) {
+                                   std::function<Matrix(size_t)> operation) {
   std::cout << std::endl << message << std::endl;
   std::cout << "Available threads: " << std::thread::hardware_concurrency()
             << std::endl;
@@ -167,17 +171,17 @@ void View::MulMatrixParallelManual(const std::string& message, int iter,
   PrintMatrixParallel(threads, iter, operation);
 }
 
-void View::MulMatrixParallelCore(const std::string& message, int iter, std::function<Matrix(size_t)> operation) {
-    std::cout << std::endl << message << std::endl;
-    for (size_t i = 2; i <= std::thread::hardware_concurrency(); i+=2) {
-        std::cout << "Number of treads " << i << std::endl;
-        PrintMatrixParallel(i, iter, operation);
-    }
+void View::MulMatrixParallelCore(const std::string& message, int iter,
+                                 std::function<Matrix(size_t)> operation) {
+  std::cout << std::endl << message << std::endl;
+  for (size_t i = 2; i <= std::thread::hardware_concurrency(); i += 2) {
+    std::cout << "Number of treads " << i << std::endl;
+    PrintMatrixParallel(i, iter, operation);
+  }
 }
 
-
 void View::PrintMatrixParallel(int threads, int iter,
-    std::function<Matrix(size_t)> operation) {
+                               std::function<Matrix(size_t)> operation) {
   Matrix result;
 
   const auto start{std::chrono::system_clock::now()};
@@ -186,7 +190,6 @@ void View::PrintMatrixParallel(int threads, int iter,
   }
   const auto finish{std::chrono::system_clock::now()};
   PrintResult(result, start, finish);
-
 }
 
 void View::PrintRow(char a, size_t length) {

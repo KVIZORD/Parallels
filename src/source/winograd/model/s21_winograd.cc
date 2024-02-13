@@ -79,8 +79,8 @@ Matrix Winograd::MulMatrixWinograd() {
 }
 
 Matrix Winograd::MulMatrixParallelWinograd(size_t threads) {
-  // std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
-  // std::cout << "Number of threads = " << threads << std::endl;
+  // std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++" <<
+  // std::endl; std::cout << "Number of threads = " << threads << std::endl;
   std::vector<std::thread> threads_pool;
   threads_pool.reserve(threads);
 
@@ -178,7 +178,7 @@ Matrix Winograd::MulMatrixConveyorWinograd() {
   Matrix result(a_rows_, b_cols_);
   std::condition_variable cv_first_stage;
   std::condition_variable cv_second_stage;
-  std::queue<size_t> row_index;                         // очередь для 2 стадии
+  std::queue<size_t> row_index;  // очередь для 2 стадии
   std::queue<std::pair<size_t, size_t>> element_index;  // очередь для 3 стадии
 
   std::thread t1([&]() {
@@ -225,7 +225,8 @@ Matrix Winograd::MulMatrixConveyorWinograd() {
   std::thread t3([&]() {
     while (true) {
       auto index = GetFromQueue(element_index, third_task, cv_second_stage);
-      result(index.first, index.second) = CalculateMatrixElement(index.first, index.second, row_factor, column_factor);
+      result(index.first, index.second) = CalculateMatrixElement(
+          index.first, index.second, row_factor, column_factor);
       if (++counter_t3 >= a_rows_ * b_cols_) break;
     }
   });
