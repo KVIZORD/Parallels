@@ -16,6 +16,8 @@ class Matrix {
     std::vector<double> r(cols, 0);
     data_ = MatrixType(rows, r);
   }
+  Matrix(const Matrix& other);
+  Matrix(Matrix&& other);
 
   size_t GetRows() const;
   size_t GetColumns() const;
@@ -24,7 +26,8 @@ class Matrix {
   void RandomMatrix();
   void FillFromConsoleMatrix();
   Matrix MulMatrix(const Matrix& other);
-  Matrix& operator= (const Matrix& other);
+
+  Matrix& operator=(const Matrix& other);
   double& operator()(size_t row, size_t col);
 
  private:

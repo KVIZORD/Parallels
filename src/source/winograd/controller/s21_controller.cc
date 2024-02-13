@@ -20,7 +20,7 @@ Matrix Controller::MulMatrix() { return model_->MulMatrix(); }
 Matrix Controller::MulMatrixWinograd() { return model_->MulMatrixWinograd(); }
 
 Matrix Controller::MulMatrixParallelWinograd(size_t threads) {
-    return model_->MulMatrixParallelWinograd(threads);
+  return model_->MulMatrixParallelWinograd(threads);
 }
 
 Matrix Controller::MulMatrixConveyorWinograd() {

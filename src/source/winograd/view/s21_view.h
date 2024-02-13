@@ -25,7 +25,7 @@ class View {
   void PrintMulMatrix(const std::string& message, int iter,
                       std::function<Matrix()> operation);
   void PrintMulMatrixParallel(const std::string& message, int iter,
-                                    std::function<Matrix(size_t)> operation);
+                              std::function<Matrix(size_t)> operation);
   void PrintRow(char a, size_t length);
   void PrintDataMatrix();
   void PrintResult(const Matrix& matrix, Time start, Time finish);

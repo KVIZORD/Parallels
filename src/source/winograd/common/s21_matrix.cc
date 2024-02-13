@@ -51,13 +51,21 @@ Matrix Matrix::MulMatrix(const Matrix& other) {
   return result;
 }
 
- Matrix& Matrix::operator=(const Matrix& other) {
- 	if (this == &other) return *this;
- 	rows_ = other.rows_;
- 	cols_ = other.cols_;
- 	data_ = other.data_;
- 	return *this;
- }
+Matrix::Matrix(const Matrix& other)
+    : rows_(other.rows_), cols_(other.cols_), data_(other.data_) {}
+
+Matrix::Matrix(Matrix&& other)
+    : rows_(std::move(other.rows_)),
+      cols_(std::move(other.cols_)),
+      data_(std::move(other.data_)) {}
+
+Matrix& Matrix::operator=(const Matrix& other) {
+  if (this == &other) return *this;
+  rows_ = other.rows_;
+  cols_ = other.cols_;
+  data_ = other.data_;
+  return *this;
+}
 
 double& Matrix::operator()(size_t row, size_t col) {
   if (row >= rows_ || col >= cols_) throw std::out_of_range("Incorrect index");
