@@ -24,12 +24,15 @@ class View {
   void FillRandom();
   void PrintMulMatrix(const std::string& message, int iter,
                       std::function<Matrix()> operation);
-  void PrintMulMatrixParallel(const std::string& message, int iter,
+  void MulMatrixParallelManual(const std::string& message, int iter,
                               std::function<Matrix(size_t)> operation);
+  void MulMatrixParallelCore(const std::string& message, int iter,
+      std::function<Matrix(size_t)> operation);
   void PrintRow(char a, size_t length);
   void PrintDataMatrix();
   void PrintResult(const Matrix& matrix, Time start, Time finish);
-  std::vector<size_t> IterForThreads(size_t iter, size_t threads);
+  void PrintMatrixParallel(int threads, int iter,
+      std::function<Matrix(size_t)> operation);
 };
 
 }  // namespace s21
