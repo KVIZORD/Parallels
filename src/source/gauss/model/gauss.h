@@ -1,15 +1,14 @@
-#ifndef PARALLELS_SOURCE_ANT_COLONY_MODEL_PHEROMONE_H_
-#define PARALLELS_SOURCE_ANT_COLONY_MODEL_PHEROMONE_H_
+#ifndef PARALLELS_SOURCE_GAUSS_MODEL_GAUSS_H_
+#define PARALLELS_SOURCE_GAUSS_MODEL_GAUSS_H_
 
 #include <cstddef>
-#include <vector>
 #include <thread>
+#include <vector>
 
 namespace s21 {
 
 namespace Gauss {
 using Matrix = std::vector<std::vector<double>>;
-const double kEpsilon = 1e-10;
 
 std::vector<double> SolveSync(Matrix matrix);
 std::vector<double>
@@ -20,4 +19,4 @@ SolveAsync(Matrix matrix,
 
 } // namespace s21
 
-#endif // PARALLELS_SOURCE_ANT_COLONY_MODEL_PHEROMONE_H_
+#endif // PARALLELS_SOURCE_GAUSS_MODEL_GAUSS_H_

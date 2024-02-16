@@ -1,4 +1,4 @@
-#include "gauss/gauss.h"
+#include "gauss/model/gauss.h"
 #include <cmath>
 #include <cstddef>
 #include <iostream>
@@ -9,17 +9,7 @@
 
 namespace s21 {
 namespace Gauss {
-
 std::mutex mtx;
-
-void PrintMatrix(const Matrix &matrix) {
-  for (auto i : matrix) {
-    for (auto j : i) {
-      std::cout << j << " ";
-    }
-    std::cout << std::endl;
-  }
-}
 
 void Eliminate(Matrix &matrix, size_t col, size_t start, size_t end) {
   size_t n = matrix.size();
@@ -81,7 +71,7 @@ std::vector<double> SolveSync(Matrix matrix) {
   for (size_t i = 0; i < n - 1; ++i) {
     Eliminate(matrix, i, i + 1, n);
   }
-  
+
   return BackSubstitution(matrix);
 }
 
