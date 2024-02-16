@@ -73,9 +73,10 @@ void View::OutputSolutionTsm() {
   PrintPathResult(pathSync, pathAsync);
 }
 
-void View::PrintPathResult(const TsmResult &path_sync, const TsmResult &path_async) {
-  std::cout << "Shortest path: " << std::endl;  
-  
+void View::PrintPathResult(const TsmResult &path_sync,
+                           const TsmResult &path_async) {
+  std::cout << "Shortest path: " << std::endl;
+
   std::cout << "\t- synchronously:  ";
   if (std::isinf(path_sync.distance)) {
     std::cout << "not found solution" << std::endl;

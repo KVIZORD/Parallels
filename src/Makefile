@@ -26,6 +26,10 @@ ant: build
 	cmake --build $(BUILD_DIR) --target ant
 	./$(BUILD_DIR)/ant
 
+winograd: build
+	cmake --build $(BUILD_DIR) --target winograd
+	./$(BUILD_DIR)/winograd
+
 build:
 	CC=gcc CXX=g++ cmake -B $(BUILD_DIR) 
 
