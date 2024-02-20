@@ -1,15 +1,16 @@
 #ifndef PARALLELS_SOURCE_GAUSS_VIEW_VIEW_H_
 #define PARALLELS_SOURCE_GAUSS_VIEW_VIEW_H_
 
-#include <functional>
 #include <gauss/controller/controller.h>
+
+#include <functional>
 #include <string>
 #include <vector>
 
 namespace s21 {
 
 class View {
-public:
+ public:
   using Matrix = std::vector<std::vector<double>>;
 
   enum class SLAEMethod { kGaussAsync, kGaussSync };
@@ -31,24 +32,24 @@ public:
 
   void Exec();
 
-private:
+ private:
+  size_t ReadNumber() const;
+  void PrintBoard() const;
+  void PrintMenu() const;
+  void CompareSolutionsSLAE() const;
+  void PrintInputPrompt() const;
+  void PrintResultVector(std::vector<double> answers) const;
+  double ReadMatrixElement() const;
   void FillMatrixWithRandomValues();
-  size_t ReadNumber();
-  void PrintBoard();
-  void Exit();
-  void PrintMenu();
-  void CompareSolutionsSLAE();
-  void PrintInputPrompt();
-  void PrintResultVector(std::vector<double> answers);
-  double ReadMatrixElement();
   void InputMatrixFromKeyboard();
   void LoadMatrixFromFile();
+  void Exit();
 
   Matrix matrix_;
   Controller controller_;
   bool exit_ = false;
 };
 
-} // namespace s21
+}  // namespace s21
 
-#endif // PARALLELS_SOURCE_GAUSS_VIEW_VIEW_H_
+#endif  // PARALLELS_SOURCE_GAUSS_VIEW_VIEW_H_

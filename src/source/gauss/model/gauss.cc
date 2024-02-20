@@ -1,11 +1,7 @@
 #include "gauss/model/gauss.h"
-#include <cmath>
-#include <cstddef>
-#include <iostream>
+
 #include <mutex>
 #include <stdexcept>
-#include <thread>
-#include <vector>
 
 namespace s21 {
 namespace Gauss {
@@ -68,5 +64,5 @@ std::vector<double> SolveSync(Matrix matrix) {
   return BackSubstitution(matrix);
 }
 
-} // namespace Gauss
-} // namespace s21
+}  // namespace Gauss
+}  // namespace s21

@@ -7,14 +7,13 @@
 
 namespace s21 {
 class Controller {
-public:
+ public:
   using Matrix = std::vector<std::vector<double>>;
 
-  std::vector<double> SolveGauseSync(const Matrix &matrix);
-  std::vector<double>
-  SolveGauseAsync(const Matrix &matrix,
-                  size_t num_threads = 4);
+  std::vector<double> SolveGauseSync(const Matrix &matrix) const;
+  std::vector<double> SolveGauseAsync(const Matrix &matrix,
+                                      size_t num_threads = 4) const;
 };
-} // namespace s21
+}  // namespace s21
 
-#endif // PARALLELS_SOURCE_GAUSS_CONTROLLER_CONTROLLER_H_
+#endif  // PARALLELS_SOURCE_GAUSS_CONTROLLER_CONTROLLER_H_

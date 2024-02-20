@@ -1,5 +1,5 @@
 #include "gauss/view/view.h"
-#include "view.h"
+
 #include <fstream>
 #include <iostream>
 
@@ -13,7 +13,7 @@ void View::Exec() {
       size_t choice = ReadNumber();
       PrintBoard();
 
-      if (choice > kMenuOptions.size() || choice <= 0) {
+      if (choice > kMenuOptions.size() || choice == 0) {
         std::cout << "Incorrect choice" << std::endl;
       } else {
         kMenuOptions[choice - 1].second();
@@ -24,7 +24,7 @@ void View::Exec() {
   }
 }
 
-void View::PrintMenu() {
+void View::PrintMenu() const {
   size_t counter = 1;
   for (auto elem : kMenuOptions) {
     std::cout << counter << ") " << elem.first << std::endl;
@@ -32,14 +32,14 @@ void View::PrintMenu() {
   }
 }
 
-void View::PrintInputPrompt() {
+void View::PrintInputPrompt() const {
   PrintBoard();
   PrintMenu();
   PrintBoard();
   std::cout << "Input number: ";
 }
 
-size_t View::ReadNumber() {
+size_t View::ReadNumber() const {
   size_t number;
   std::cin >> number;
   if (std::cin.fail()) {
@@ -51,7 +51,7 @@ size_t View::ReadNumber() {
   return number;
 }
 
-double View::ReadMatrixElement() {
+double View::ReadMatrixElement() const {
   double number;
   std::cin >> number;
   if (std::cin.fail()) {
@@ -86,7 +86,6 @@ void View::LoadMatrixFromFile() {
   std::ifstream file(path);
   if (!file.is_open()) {
     throw std::invalid_argument("Error opening file.");
-    return;
   }
 
   size_t N;
@@ -98,7 +97,6 @@ void View::LoadMatrixFromFile() {
     for (size_t j = 0; j < N + 1; ++j) {
       if (!(file >> matrix_[i][j])) {
         throw std::invalid_argument("Error reading matrix element.");
-        return;
       }
     }
   }
@@ -106,7 +104,7 @@ void View::LoadMatrixFromFile() {
   std::cout << "Matrix loaded successfully from file." << std::endl;
 }
 
-void View::PrintBoard() {
+void View::PrintBoard() const {
   for (size_t i = 0; i < kBoardSize; ++i) {
     std::cout << kBoardSym;
   }
@@ -115,7 +113,7 @@ void View::PrintBoard() {
 
 void View::Exit() { exit_ = true; }
 
-void View::PrintResultVector(std::vector<double> answers) {
+void View::PrintResultVector(std::vector<double> answers) const {
   for (double answer : answers) {
     std::cout << answer << " ";
   }
@@ -134,10 +132,9 @@ void View::FillMatrixWithRandomValues() {
   }
 }
 
-void View::CompareSolutionsSLAE() {
+void View::CompareSolutionsSLAE() const {
   if (matrix_.empty() || matrix_[0].empty()) {
     throw std::invalid_argument("Empty matrix");
-    return;
   }
 
   std::cout << "Input the number of repetitions:" << std::endl;
@@ -172,4 +169,4 @@ void View::CompareSolutionsSLAE() {
   PrintResultVector(async_result);
 }
 
-} // namespace s21
+}  // namespace s21
