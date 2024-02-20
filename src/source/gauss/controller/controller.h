@@ -13,7 +13,7 @@ public:
   std::vector<double> SolveGauseSync(const Matrix &matrix);
   std::vector<double>
   SolveGauseAsync(const Matrix &matrix,
-                  size_t num_threads = std::thread::hardware_concurrency());
+                  size_t num_threads = 4);
 };
 } // namespace s21
 

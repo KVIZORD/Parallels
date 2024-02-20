@@ -9,21 +9,14 @@
 
 namespace s21 {
 namespace Gauss {
-std::mutex mtx;
 
 void Eliminate(Matrix &matrix, size_t col, size_t start, size_t end) {
   size_t n = matrix.size();
   for (size_t i = start; i < end; ++i) {
     double factor;
-    {
-      std::lock_guard<std::mutex> lock(mtx); // блокируем доступ к матрице
-      factor = matrix[i][col] / matrix[col][col];
-    }
+    factor = matrix[i][col] / matrix[col][col];
     for (size_t j = col; j < n + 1; ++j) {
-      {
-        std::lock_guard<std::mutex> lock(mtx); // блокируем доступ к матрице
-        matrix[i][j] -= factor * matrix[col][j];
-      }
+      matrix[i][j] -= factor * matrix[col][j];
     }
   }
 }

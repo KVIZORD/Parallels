@@ -1,5 +1,6 @@
 #include "gauss/view/view.h"
 #include "view.h"
+#include <fstream>
 #include <iostream>
 
 namespace s21 {
@@ -7,27 +8,31 @@ View::View(Controller &controller) : controller_(controller) {}
 
 void View::Exec() {
   while (!exit_) {
-    PrintInputPromt();
-    size_t choice = ReadNumber();
-    PrintBoard();
+    try {
+      PrintInputPrompt();
+      size_t choice = ReadNumber();
+      PrintBoard();
 
-    if (choice > kMenu.size()) {
-      std::cout << "ERROR" << std::endl;
-    } else {
-      kMenu[choice - 1].second();
+      if (choice > kMenuOptions.size() || choice <= 0) {
+        std::cout << "Incorrect choice" << std::endl;
+      } else {
+        kMenuOptions[choice - 1].second();
+      }
+    } catch (const std::exception &e) {
+      std::cout << e.what() << std::endl;
     }
   }
 }
 
 void View::PrintMenu() {
   size_t counter = 1;
-  for (auto elem : kMenu) {
+  for (auto elem : kMenuOptions) {
     std::cout << counter << ") " << elem.first << std::endl;
     ++counter;
   }
 }
 
-void View::PrintInputPromt() {
+void View::PrintInputPrompt() {
   PrintBoard();
   PrintMenu();
   PrintBoard();
@@ -40,10 +45,65 @@ size_t View::ReadNumber() {
   if (std::cin.fail()) {
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    number = 0;
+    throw std::invalid_argument("Invalid input");
   }
 
   return number;
+}
+
+double View::ReadMatrixElement() {
+  double number;
+  std::cin >> number;
+  if (std::cin.fail()) {
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    throw std::invalid_argument("Invalid input");
+  }
+
+  return number;
+}
+
+void View::InputMatrixFromKeyboard() {
+  std::cout << "Input number of unknowns: ";
+  size_t N = ReadNumber();
+
+  matrix_.resize(N);
+  for (size_t i = 0; i < N; ++i) {
+    matrix_[i].resize(N + 1);
+    for (size_t j = 0; j < N + 1; ++j) {
+      std::cout << "[" << i << "]"
+                << "[" << j << "] = ";
+      matrix_[i][j] = ReadMatrixElement();
+    }
+  }
+}
+
+void View::LoadMatrixFromFile() {
+  std::cout << "File path: ";
+  std::string path;
+  std::cin >> path;
+
+  std::ifstream file(path);
+  if (!file.is_open()) {
+    throw std::invalid_argument("Error opening file.");
+    return;
+  }
+
+  size_t N;
+  file >> N;
+
+  matrix_.resize(N);
+  for (size_t i = 0; i < N; ++i) {
+    matrix_[i].resize(N + 1);
+    for (size_t j = 0; j < N + 1; ++j) {
+      if (!(file >> matrix_[i][j])) {
+        throw std::invalid_argument("Error reading matrix element.");
+        return;
+      }
+    }
+  }
+
+  std::cout << "Matrix loaded successfully from file." << std::endl;
 }
 
 void View::PrintBoard() {
@@ -55,39 +115,61 @@ void View::PrintBoard() {
 
 void View::Exit() { exit_ = true; }
 
-std::vector<double> View::RunMultiple(size_t count, SLAEMethod method) {
-  std::vector<double> result;
-  for (size_t i = 0; i < count; i++) {
-    result = (method == SLAEMethod::kGaussAsync)
-                 ? controller_.SolveGauseAsync(matrix_)
-                 : controller_.SolveGauseSync(matrix_);
+void View::PrintResultVector(std::vector<double> answers) {
+  for (double answer : answers) {
+    std::cout << answer << " ";
   }
+  std::cout << std::endl;
+}
 
-  return result;
+void View::FillMatrixWithRandomValues() {
+  std::cout << "Input number of unknowns:" << std::endl;
+  size_t size = ReadNumber();
+
+  for (size_t i = 0; i < size; ++i) {
+    matrix_.push_back(std::vector<double>());
+    for (size_t j = 0; j < size + 1; ++j) {
+      matrix_[i].push_back(rand() % 100);
+    }
+  }
 }
 
 void View::CompareSolutionsSLAE() {
+  if (matrix_.empty() || matrix_[0].empty()) {
+    throw std::invalid_argument("Empty matrix");
+    return;
+  }
+
   std::cout << "Input the number of repetitions:" << std::endl;
   size_t count = ReadNumber();
 
-  auto time_sync = MeasureTime(
-      [&count, this]() { return RunMultiple(count, SLAEMethod::kGaussSync); });
-  auto time_async = MeasureTime(
-      [&count, this]() { return RunMultiple(count, SLAEMethod::kGaussAsync); });
+  std::chrono::milliseconds time_sync;
+  std::chrono::milliseconds time_async;
+  std::vector<double> sync_result;
+  std::vector<double> async_result;
+
+  auto begin = std::chrono::steady_clock::now();
+  for (size_t i = 0; i < count; ++i) {
+    async_result = controller_.SolveGauseAsync(matrix_);
+  }
+  auto end = std::chrono::steady_clock::now();
+  time_async =
+      std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+
+  begin = std::chrono::steady_clock::now();
+  for (size_t i = 0; i < count; ++i) {
+    sync_result = controller_.SolveGauseSync(matrix_);
+  }
+  end = std::chrono::steady_clock::now();
+  time_sync =
+      std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
 
   std::cout << "Times of execution: " << std::endl;
-  std::cout << "\t- synchronously:  " << time_sync.count() << "ms" << std::endl;
-  std::cout << "\t- asynchronously: " << time_async.count() << "ms"
-            << std::endl;
-}
+  std::cout << "Synchronously:  " << time_sync.count() << "ms" << std::endl;
+  std::cout << "Asynchronously: " << time_async.count() << "ms" << std::endl;
 
-std::chrono::milliseconds
-View::MeasureTime(std::function<std::vector<double>()> solve_slae) {
-  auto begin = std::chrono::steady_clock::now();
-  solve_slae();
-  auto end = std::chrono::steady_clock::now();
-
-  return std::chrono::duration_cast<std::chrono::milliseconds>(end - begin);
+  PrintResultVector(sync_result);
+  PrintResultVector(async_result);
 }
 
 } // namespace s21

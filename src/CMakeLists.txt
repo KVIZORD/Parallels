@@ -35,8 +35,9 @@ file(GLOB_RECURSE TEST_SOURCES ${TEST_DIR}/*.cc)
 
 add_executable(ant ${ANT_COLONY_SOURCE})
 add_executable(winograd ${WINOGRAD_SOURCE})
-target_include_directories(ant PUBLIC ${RELATIVE_HEADER_DIR})
 add_executable(gauss ${GAUSS_SOURCE})
+
+target_include_directories(ant PUBLIC ${RELATIVE_HEADER_DIR})
 target_include_directories(gauss PUBLIC ${RELATIVE_HEADER_DIR})
 target_include_directories(winograd PUBLIC ${RELATIVE_HEADER_DIR})
 

@@ -30,6 +30,10 @@ winograd: build
 	cmake --build $(BUILD_DIR) --target winograd
 	./$(BUILD_DIR)/winograd
 
+gauss: build
+	cmake --build $(BUILD_DIR) --target gauss
+	./$(BUILD_DIR)/gauss
+
 build:
 	CC=gcc CXX=g++ cmake -B $(BUILD_DIR) 
 
