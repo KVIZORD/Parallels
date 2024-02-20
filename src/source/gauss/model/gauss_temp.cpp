@@ -12,7 +12,6 @@ namespace s21 {
 namespace Gauss {
 
 std::condition_variable cv;
-std::pair<bool, std::mutex> row_proccessed;
 
 size_t GetChunk(size_t rows_count, size_t threads_count, size_t thread_num) {
   size_t chunk_size = rows_count / threads_count;
@@ -22,18 +21,20 @@ size_t GetChunk(size_t rows_count, size_t threads_count, size_t thread_num) {
 }
 
 void Eliminate(Matrix &matrix, const std::vector<size_t> &rows,
-               std::vector<bool> &row_proccessed,
+               std::vector<bool> &row_processed,
                std::vector<std::mutex> &mutexes) {
-  for (auto row : rows) {
+  for (auto &row : rows) {
+    std::cout << row << "IN PROGRESS";
     for (size_t i = 0; i < row; ++i) {
       size_t pivot_str = i;
-     
-      if (row_proccessed)
-      std::unique_lock<std::mutex> lock(mutexes[pivot_str]);
 
-      cv.wait(lock, [&row_proccessed, &pivot_str] {
-        return row_proccessed[pivot_str];
-      });
+      {
+        std::unique_lock<std::mutex> lock(mutexes[pivot_str]);
+
+        cv.wait(lock, [&row_processed, &pivot_str] {
+          return row_processed[pivot_str];
+        });
+      }
 
       double factor = matrix[row][i] / matrix[pivot_str][pivot_str];
 
@@ -42,7 +43,7 @@ void Eliminate(Matrix &matrix, const std::vector<size_t> &rows,
       }
     }
 
-    row_proccessed[row] = true;
+    row_processed[row] = true;
     cv.notify_all();
   }
 }
@@ -65,6 +66,7 @@ std::vector<double> BackSubstitution(const Matrix &matrix) {
 std::vector<double> SolveAsync(Matrix matrix, size_t threads_count) {
   std::vector<bool> row_proccessed(matrix.size(), false);
   std::vector<std::mutex> mutexes(matrix.size());
+  std::vector<std::thread> threads;
   std::vector<std::vector<size_t>> rows(threads_count, std::vector<size_t>());
   row_proccessed[0] = true;
 
@@ -73,9 +75,13 @@ std::vector<double> SolveAsync(Matrix matrix, size_t threads_count) {
   }
 
   for (size_t i = 0; i < threads_count; ++i) {
-    std::thread(Eliminate, std::ref(matrix), std::cref(rows[i]),
-                std::ref(row_proccessed), std::ref(mutexes))
-        .join();
+    threads.push_back(std::thread(Eliminate, std::ref(matrix),
+                                  std::cref(rows[i]), std::ref(row_proccessed),
+                                  std::ref(mutexes)));
+  }
+
+  for (auto &t : threads) {
+    t.join();
   }
 
   return BackSubstitution(matrix);

@@ -124,10 +124,11 @@ void View::FillMatrixWithRandomValues() {
   std::cout << "Input number of unknowns:" << std::endl;
   size_t size = ReadNumber();
 
+  matrix_.resize(size);
   for (size_t i = 0; i < size; ++i) {
-    matrix_.push_back(std::vector<double>());
+    matrix_[i].resize(size + 1);
     for (size_t j = 0; j < size + 1; ++j) {
-      matrix_[i].push_back(rand() % 100);
+      matrix_[i][j] = rand() % 1000;
     }
   }
 }
@@ -166,7 +167,8 @@ void View::CompareSolutionsSLAE() const {
   std::cout << "Asynchronously: " << time_async.count() << "ms" << std::endl;
 
   PrintResultVector(sync_result);
+  std::cout << std::endl;
   PrintResultVector(async_result);
 }
 
-}  // namespace s21
+} // namespace s21
