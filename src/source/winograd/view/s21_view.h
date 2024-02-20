@@ -1,5 +1,5 @@
-#ifndef PARALLELS_WINOGRAD_VIEW_VIEW_H
-#define PARALLELS_WINOGRAD_VIEW_VIEW_H
+#ifndef PARALLELS_SOURCE_WINOGRAD_VIEW_S21_VIEW_H_
+#define PARALLELS_SOURCE_WINOGRAD_VIEW_S21_VIEW_H_
 
 #include <chrono>
 #include <functional>
@@ -37,4 +37,4 @@ class View {
 
 }  // namespace s21
 
-#endif  // PARALLELS_WINOGRAD_VIEW_VIEW_H
+#endif  // PARALLELS_SOURCE_WINOGRAD_VIEW_S21_VIEW_H_
