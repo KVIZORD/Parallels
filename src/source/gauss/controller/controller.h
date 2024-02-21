@@ -12,7 +12,7 @@ class Controller {
 
   std::vector<double> SolveGauseSync(const Matrix &matrix) const;
   std::vector<double> SolveGauseAsync(const Matrix &matrix,
-                                      size_t num_threads = 4) const;
+                                      std::size_t num_threads = 4) const;
 };
 }  // namespace s21
 

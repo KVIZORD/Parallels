@@ -171,4 +171,4 @@ void View::CompareSolutionsSLAE() const {
   PrintResultVector(async_result);
 }
 
-} // namespace s21
+}  // namespace s21

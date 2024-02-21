@@ -5,12 +5,12 @@
 namespace s21 {
 
 std::vector<double> Controller::SolveGauseSync(const Matrix &matrix) const {
-  return Gauss::SolveSync(matrix);
+  return Gauss().SolveSync(matrix);
 }
 
 std::vector<double> Controller::SolveGauseAsync(const Matrix &matrix,
-                                                size_t num_threads) const {
-  return Gauss::SolveAsync(matrix, num_threads);
+                                                std::size_t num_threads) const {
+  return Gauss().SolveAsync(matrix, num_threads);
 }
 
 }  // namespace s21

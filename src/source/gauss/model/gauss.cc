@@ -1,38 +1,31 @@
 #include "gauss/model/gauss.h"
-#include <algorithm>
-#include <condition_variable>
-#include <iostream>
-#include <mutex>
 
 namespace s21 {
-namespace Gauss {
 
-std::condition_variable cv;
-
-void Eliminate(Matrix &matrix, const std::vector<size_t> &rows,
-               std::vector<bool> &row_processed,
-               std::vector<std::mutex> &mutexes) {
-  for (auto &row : rows) {
-    std::unique_lock<std::mutex> lock(mutexes[row]);
+void Gauss::Eliminate(Matrix &matrix, const std::vector<size_t> &rows) {
+  for (const auto &row : rows) {
     for (size_t i = 0; i < row; ++i) {
+      {
+        std::unique_lock<std::mutex> lock(mtx_);
+        cv_.wait(lock, [&] { return row_processed_[i]; });
+      }
 
-      size_t pivot_str = i;
-
-      cv.wait(lock, [&] { return row_processed[pivot_str]; });
-
-      double factor = matrix[row][i] / matrix[pivot_str][pivot_str];
+      double factor = matrix[row][i] / matrix[i][i];
 
       for (size_t j = 0; j < matrix[row].size(); ++j) {
-        matrix[row][j] -= factor * matrix[pivot_str][j];
+        matrix[row][j] -= factor * matrix[i][j];
       }
     }
 
-    row_processed[row] = true;
-    cv.notify_all();
+    {
+      std::unique_lock<std::mutex> lock(mtx_);
+      row_processed_[row] = true;
+      cv_.notify_all();
+    }
   }
 }
 
-std::vector<double> BackSubstitution(const Matrix &matrix) {
+std::vector<double> Gauss::BackSubstitution(const Matrix &matrix) {
   int n = matrix.size();
   std::vector<double> solution(n, 0.0);
 
@@ -47,21 +40,22 @@ std::vector<double> BackSubstitution(const Matrix &matrix) {
   return solution;
 }
 
-std::vector<double> SolveAsync(Matrix matrix, size_t threads_count) {
-  std::vector<bool> row_proccessed(matrix.size(), false);
-  std::vector<std::mutex> mutexes(matrix.size());
+std::vector<double> Gauss::SolveAsync(Matrix matrix,
+                                      std::size_t threads_count) {
+  row_processed_.resize(matrix.size(), false);
   std::vector<std::thread> threads;
   std::vector<std::vector<size_t>> rows(threads_count, std::vector<size_t>());
-  row_proccessed[0] = true;
 
-  for (size_t i = 1; i < matrix.size(); ++i) {
-    rows[(i - 1) % threads_count].push_back(i);
+  for (size_t i = 0; i < matrix.size(); ++i) {
+    rows[(i) % threads_count].push_back(i);
   }
 
   for (size_t i = 0; i < threads_count; ++i) {
-    threads.push_back(std::thread(Eliminate, std::ref(matrix),
-                                  std::cref(rows[i]), std::ref(row_proccessed),
-                                  std::ref(mutexes)));
+    threads.push_back(std::thread(
+        [this](Matrix &matrix, const std::vector<size_t> &rows) {
+          this->Eliminate(matrix, rows);
+        },
+        std::ref(matrix), std::cref(rows[i])));
   }
 
   for (auto &t : threads) {
@@ -71,20 +65,16 @@ std::vector<double> SolveAsync(Matrix matrix, size_t threads_count) {
   return BackSubstitution(matrix);
 }
 
-std::vector<double> SolveSync(Matrix matrix) {
+std::vector<double> Gauss::SolveSync(Matrix matrix) {
   std::vector<size_t> rows;
-  for (size_t i = 1; i < matrix.size(); ++i) {
+  for (size_t i = 0; i < matrix.size(); ++i) {
     rows.push_back(i);
   }
 
-  std::vector<bool> row_proccessed(matrix.size(), false);
-  std::vector<std::mutex> mutexes(matrix.size());
-  row_proccessed[0] = true;
-
-  Eliminate(matrix, rows, row_proccessed, mutexes);
+  row_processed_.resize(matrix.size(), false);
+  Eliminate(matrix, rows);
 
   return BackSubstitution(matrix);
 }
 
-} // namespace Gauss
-} // namespace s21
+}  // namespace s21
