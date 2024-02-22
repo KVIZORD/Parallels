@@ -1,6 +1,5 @@
 #include "gauss/view/view.h"
 
-#include <cmath>
 #include <fstream>
 #include <iostream>
 
@@ -67,13 +66,12 @@ double View::ReadMatrixElement() const {
 void View::InputMatrixFromKeyboard() {
   std::cout << "Input number of unknowns: ";
   size_t N = ReadNumber();
+  std::cout << "Input matrix " << N << "x" << N + 1 << std::endl;
 
   matrix_.resize(N);
   for (size_t i = 0; i < N; ++i) {
     matrix_[i].resize(N + 1);
     for (size_t j = 0; j < N + 1; ++j) {
-      std::cout << "[" << i << "]"
-                << "[" << j << "] = ";
       matrix_[i][j] = ReadMatrixElement();
     }
   }
@@ -115,14 +113,14 @@ void View::PrintBoard() const {
 void View::Exit() { exit_ = true; }
 
 void View::PrintResultVector(std::vector<double> answers) const {
+  if (answers.empty()) {
+    std::cout << "Undefined" << std::endl;
+    return;
+  }
+
   std::string result_string = "";
   for (double answer : answers) {
-    if (std::isnan(answer)) {
-      std::cout << "Undefined" << std::endl;
-      return;
-    } else {
-      result_string += std::to_string(answer) + " ";
-    }
+    result_string += std::to_string(answer) + " ";
   }
   std::cout << result_string << std::endl;
 }

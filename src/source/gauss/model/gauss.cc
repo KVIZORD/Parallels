@@ -1,5 +1,7 @@
 #include "gauss/model/gauss.h"
 
+#include <cmath>
+
 namespace s21 {
 
 void Gauss::Eliminate(Matrix &matrix, const std::vector<size_t> &rows) {
@@ -35,6 +37,11 @@ std::vector<double> Gauss::BackSubstitution(const Matrix &matrix) {
       sum += matrix[i][j] * solution[j];
     }
     solution[i] = (matrix[i][n] - sum) / matrix[i][i];
+
+    if (std::isnan(solution[i])) {
+      solution.clear();
+      break;
+    }
   }
 
   return solution;
