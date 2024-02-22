@@ -15,7 +15,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 enable_testing()
-add_executable(${PROJECT_NAME} ${TEST_SOURCES} ${ANT_COLONY_MODEL})
+add_executable(${PROJECT_NAME} ${TEST_SOURCES} ${ANT_COLONY_MODEL} ${GAUSS_MODEL})
 target_link_libraries(${PROJECT_NAME} GTest::gtest_main)
 target_include_directories(${PROJECT_NAME} PUBLIC ${RELATIVE_HEADER_DIR})
 
