@@ -21,6 +21,7 @@ class Gauss {
  private:
   void Eliminate(Matrix &matrix, const std::vector<std::size_t> &rows);
   std::vector<double> BackSubstitution(const Matrix &matrix);
+  void RemoveZeroesFromDiagonal(Matrix &matrix);
 
   std::vector<bool> row_processed_;
   std::condition_variable cv_;

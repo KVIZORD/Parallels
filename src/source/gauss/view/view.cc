@@ -1,5 +1,6 @@
 #include "gauss/view/view.h"
 
+#include <cmath>
 #include <fstream>
 #include <iostream>
 
@@ -114,10 +115,16 @@ void View::PrintBoard() const {
 void View::Exit() { exit_ = true; }
 
 void View::PrintResultVector(std::vector<double> answers) const {
+  std::string result_string = "";
   for (double answer : answers) {
-    std::cout << answer << " ";
+    if (std::isnan(answer)) {
+      std::cout << "Undefined" << std::endl;
+      return;
+    } else {
+      result_string += std::to_string(answer) + " ";
+    }
   }
-  std::cout << std::endl;
+  std::cout << result_string << std::endl;
 }
 
 void View::FillMatrixWithRandomValues() {
@@ -166,9 +173,9 @@ void View::CompareSolutionsSLAE() const {
   std::cout << "Synchronously:  " << time_sync.count() << "ms" << std::endl;
   std::cout << "Asynchronously: " << time_async.count() << "ms" << std::endl;
 
+  std::cout << "Results: " << std::endl;
   PrintResultVector(sync_result);
-  std::cout << std::endl;
   PrintResultVector(async_result);
 }
 
-}  // namespace s21
+} // namespace s21

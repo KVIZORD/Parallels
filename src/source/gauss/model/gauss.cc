@@ -42,6 +42,8 @@ std::vector<double> Gauss::BackSubstitution(const Matrix &matrix) {
 
 std::vector<double> Gauss::SolveAsync(Matrix matrix,
                                       std::size_t threads_count) {
+  RemoveZeroesFromDiagonal(matrix);
+
   row_processed_.resize(matrix.size(), false);
   std::vector<std::thread> threads;
   std::vector<std::vector<size_t>> rows(threads_count, std::vector<size_t>());
@@ -66,6 +68,8 @@ std::vector<double> Gauss::SolveAsync(Matrix matrix,
 }
 
 std::vector<double> Gauss::SolveSync(Matrix matrix) {
+  RemoveZeroesFromDiagonal(matrix);
+
   std::vector<size_t> rows;
   for (size_t i = 0; i < matrix.size(); ++i) {
     rows.push_back(i);
@@ -77,4 +81,17 @@ std::vector<double> Gauss::SolveSync(Matrix matrix) {
   return BackSubstitution(matrix);
 }
 
-}  // namespace s21
+void Gauss::RemoveZeroesFromDiagonal(Matrix &matrix) {
+  for (size_t i = 0; i < matrix.size(); ++i) {
+    if (matrix[i][i] == 0) {
+      for (size_t j = i; j < matrix.size(); ++j) {
+        if (matrix[j][i] != 0) {
+          std::swap(matrix[i], matrix[j]);
+          break;
+        }
+      }
+    }
+  }
+}
+
+} // namespace s21
