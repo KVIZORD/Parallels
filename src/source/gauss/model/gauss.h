@@ -21,10 +21,11 @@ class Gauss {
  private:
   void Eliminate(Matrix &matrix, const std::vector<std::size_t> &rows);
   std::vector<double> BackSubstitution(const Matrix &matrix);
-  void RemoveZeroesFromDiagonal(Matrix &matrix);
 
+  std::vector<size_t> col_processed_;
   std::vector<bool> row_processed_;
-  std::condition_variable cv_;
+  std::condition_variable pivot_row_processed_;
+  std::condition_variable prev_col_processed_;
   std::mutex mtx_;
 };
 

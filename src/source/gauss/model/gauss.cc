@@ -5,25 +5,48 @@
 namespace s21 {
 
 void Gauss::Eliminate(Matrix &matrix, const std::vector<size_t> &rows) {
-  for (const auto &row : rows) {
-    for (size_t i = 0; i < row; ++i) {
-      {
-        std::unique_lock<std::mutex> lock(mtx_);
-        cv_.wait(lock, [&] { return row_processed_[i]; });
-      }
-
-      double factor = matrix[row][i] / matrix[i][i];
-
-      for (size_t j = 0; j < matrix[row].size(); ++j) {
-        matrix[row][j] -= factor * matrix[i][j];
-      }
-    }
-
+  for (size_t curr_row = 0; curr_row < matrix.size(); ++curr_row) {
     {
       std::unique_lock<std::mutex> lock(mtx_);
-      row_processed_[row] = true;
-      cv_.notify_all();
+      prev_col_processed_.wait(lock, [&] {
+        return curr_row == 0 ||
+               col_processed_[curr_row - 1] == matrix.size() - curr_row;
+      });
+
+      for (size_t j = curr_row; j < matrix.size(); ++j) {
+        if (std::abs(matrix[j][curr_row]) >
+            std::abs(matrix[curr_row][curr_row])) {
+          std::swap(matrix[curr_row], matrix[j]);
+        }
+      }
     }
+
+    for (const auto &row : rows) {
+      if (curr_row >= row) {
+        std::unique_lock<std::mutex> lock(mtx_);
+        row_processed_[row] = true;
+        pivot_row_processed_.notify_all();
+        continue;
+      }
+
+      std::unique_lock<std::mutex> wait_lock(mtx_);
+      pivot_row_processed_.wait(wait_lock,
+                                [&] { return row_processed_[curr_row]; });
+      wait_lock.unlock();
+
+      double factor = matrix[row][curr_row] / matrix[curr_row][curr_row];
+      for (size_t j = 0; j < matrix[row].size(); ++j) {
+        matrix[row][j] -= factor * matrix[curr_row][j];
+      }
+
+      std::unique_lock<std::mutex> col_processed_lock(mtx_);
+      col_processed_[curr_row] += 1;
+      col_processed_lock.unlock();
+    }
+
+    std::unique_lock<std::mutex> notify_lock(mtx_);
+    prev_col_processed_.notify_all();
+    notify_lock.unlock();
   }
 }
 
@@ -49,9 +72,9 @@ std::vector<double> Gauss::BackSubstitution(const Matrix &matrix) {
 
 std::vector<double> Gauss::SolveAsync(Matrix matrix,
                                       std::size_t threads_count) {
-  RemoveZeroesFromDiagonal(matrix);
-
   row_processed_.resize(matrix.size(), false);
+  col_processed_.resize(matrix.size(), 0);
+
   std::vector<std::thread> threads;
   std::vector<std::vector<size_t>> rows(threads_count, std::vector<size_t>());
 
@@ -75,30 +98,17 @@ std::vector<double> Gauss::SolveAsync(Matrix matrix,
 }
 
 std::vector<double> Gauss::SolveSync(Matrix matrix) {
-  RemoveZeroesFromDiagonal(matrix);
+  row_processed_.resize(matrix.size(), false);
+  col_processed_.resize(matrix.size(), 0);
 
   std::vector<size_t> rows;
   for (size_t i = 0; i < matrix.size(); ++i) {
     rows.push_back(i);
   }
 
-  row_processed_.resize(matrix.size(), false);
   Eliminate(matrix, rows);
 
   return BackSubstitution(matrix);
-}
-
-void Gauss::RemoveZeroesFromDiagonal(Matrix &matrix) {
-  for (size_t i = 0; i < matrix.size(); ++i) {
-    if (matrix[i][i] == 0) {
-      for (size_t j = i; j < matrix.size(); ++j) {
-        if (matrix[j][i] != 0) {
-          std::swap(matrix[i], matrix[j]);
-          break;
-        }
-      }
-    }
-  }
 }
 
 } // namespace s21
