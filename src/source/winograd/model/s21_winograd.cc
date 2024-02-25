@@ -1,4 +1,4 @@
-#include "s21_winograd.h"
+#include "winograd/model/s21_winograd.h"
 
 namespace s21 {
 

@@ -5,7 +5,7 @@
 #include <iostream>
 #include <vector>
 
-#include "tsm_result.h"
+#include "ant_colony/model/tsm_result.h"
 
 namespace s21 {
 

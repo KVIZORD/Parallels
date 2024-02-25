@@ -1,4 +1,4 @@
-#include "ant.h"
+#include "ant_colony/model/ant.h"
 
 #include <cmath>
 #include <iostream>

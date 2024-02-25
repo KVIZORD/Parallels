@@ -4,11 +4,11 @@
 #include <random>
 #include <vector>
 
-#include "ant.h"
-#include "ant_colony_base.h"
-#include "graph.h"
-#include "pheromone.h"
-#include "tsm_result.h"
+#include "ant_colony/model/ant.h"
+#include "ant_colony/model/ant_colony_base.h"
+#include "ant_colony/model/graph.h"
+#include "ant_colony/model/pheromone.h"
+#include "ant_colony/model/tsm_result.h"
 
 namespace s21 {
 

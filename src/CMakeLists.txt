@@ -49,6 +49,3 @@ add_custom_target(cppcheck COMMAND cppcheck --language=c++ --enable=all --suppre
 
 enable_testing()
 add_subdirectory(${TEST_DIR})
-# add_subdirectory(${SOURCE_DIR})
-
-

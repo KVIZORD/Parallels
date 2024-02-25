@@ -1,4 +1,4 @@
-#include "graph.h"
+#include "ant_colony/model/graph.h"
 
 namespace s21 {
 

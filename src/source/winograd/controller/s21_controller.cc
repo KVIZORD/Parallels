@@ -1,4 +1,4 @@
-#include "s21_controller.h"
+#include "winograd/controller/s21_controller.h"
 
 namespace s21 {
 

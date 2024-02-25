@@ -5,24 +5,22 @@
 namespace s21 {
 
 void Gauss::Eliminate(Matrix &matrix, const std::vector<size_t> &rows) {
-  for (size_t curr_row = 0; curr_row < matrix.size(); ++curr_row) {
+  for (size_t col = 0; col < matrix.size(); ++col) {
     {
       std::unique_lock<std::mutex> lock(mtx_);
       prev_col_processed_.wait(lock, [&] {
-        return curr_row == 0 ||
-               col_processed_[curr_row - 1] == matrix.size() - curr_row;
+        return col == 0 || col_processed_[col - 1] == matrix.size() - col;
       });
 
-      for (size_t j = curr_row; j < matrix.size(); ++j) {
-        if (std::abs(matrix[j][curr_row]) >
-            std::abs(matrix[curr_row][curr_row])) {
-          std::swap(matrix[curr_row], matrix[j]);
+      for (size_t j = col; j < matrix.size(); ++j) {
+        if (std::abs(matrix[j][col]) > std::abs(matrix[col][col])) {
+          std::swap(matrix[col], matrix[j]);
         }
       }
     }
 
     for (const auto &row : rows) {
-      if (curr_row >= row) {
+      if (col >= row) {
         std::unique_lock<std::mutex> lock(mtx_);
         row_processed_[row] = true;
         pivot_row_processed_.notify_all();
@@ -30,17 +28,16 @@ void Gauss::Eliminate(Matrix &matrix, const std::vector<size_t> &rows) {
       }
 
       std::unique_lock<std::mutex> wait_lock(mtx_);
-      pivot_row_processed_.wait(wait_lock,
-                                [&] { return row_processed_[curr_row]; });
+      pivot_row_processed_.wait(wait_lock, [&] { return row_processed_[col]; });
       wait_lock.unlock();
 
-      double factor = matrix[row][curr_row] / matrix[curr_row][curr_row];
+      double factor = matrix[row][col] / matrix[col][col];
       for (size_t j = 0; j < matrix[row].size(); ++j) {
-        matrix[row][j] -= factor * matrix[curr_row][j];
+        matrix[row][j] -= factor * matrix[col][j];
       }
 
       std::unique_lock<std::mutex> col_processed_lock(mtx_);
-      col_processed_[curr_row] += 1;
+      col_processed_[col] += 1;
       col_processed_lock.unlock();
     }
 
@@ -111,4 +108,4 @@ std::vector<double> Gauss::SolveSync(Matrix matrix) {
   return BackSubstitution(matrix);
 }
 
-} // namespace s21
+}  // namespace s21

@@ -1,4 +1,4 @@
-#include "pheromone.h"
+#include "ant_colony/model/pheromone.h"
 
 namespace s21 {
 

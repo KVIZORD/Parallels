@@ -1,4 +1,4 @@
-#include "s21_matrix.h"
+#include "winograd/common/s21_matrix.h"
 
 namespace s21 {
 size_t Matrix::GetRows() const { return rows_; }

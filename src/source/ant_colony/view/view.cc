@@ -1,4 +1,4 @@
-#include "view.h"
+#include "ant_colony/view/view.h"
 
 namespace s21 {
 

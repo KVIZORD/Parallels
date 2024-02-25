@@ -1,4 +1,4 @@
-#include "ant_colony_sync.h"
+#include "ant_colony/model/ant_colony_sync.h"
 
 namespace s21 {
 

@@ -8,8 +8,8 @@
 #include <thread>
 #include <vector>
 
-#include "../common/s21_matrix.h"
-#include "../common/s21_winograd_data.h"
+#include "winograd/common/s21_matrix.h"
+#include "winograd/common/s21_winograd_data.h"
 
 namespace s21 {
 
