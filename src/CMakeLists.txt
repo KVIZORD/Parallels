@@ -44,7 +44,7 @@ target_include_directories(winograd PUBLIC ${RELATIVE_HEADER_DIR})
 
 add_custom_target(format COMMAND clang-format --style=Google -i --verbose ${ALL_SOURCES})
 add_custom_target(stylecheck COMMAND clang-format --style=Google -n --verbose ${ALL_SOURCES})
-add_custom_target(cppcheck COMMAND cppcheck --language=c++ --enable=all --suppress=unusedFunction --suppress=missingInclude --inconclusive --suppress=functionStatic ${ANT_COLONY_SOURCE} ${GAUSS_SOURCE} ${WINOGRAD_SOURCE})
+add_custom_target(cppcheck COMMAND cppcheck --language=c++ --enable=all --suppress=missingInclude --inconclusive ${ANT_COLONY_SOURCE} ${GAUSS_SOURCE} ${WINOGRAD_SOURCE})
 
 
 enable_testing()
