@@ -48,15 +48,6 @@ std::vector<std::vector<size_t>> kMatrixNoSolution{
 
 static const size_t count_colony = 1;
 static const size_t size_colony = 1000;
-// s21::AntColonySync ant_colony_sync(graph, count_colony, size_colony);
-// s21::AntColonyAsync ant_colony_async(graph, count_colony, size_colony);
-
-// TEST(AntColonySyncTest, ThrowEmptyGraph) {
-//   ASSERT_THROW(s21::Graph graph(kMatrix_0_0), std::invalid_argument);
-//   // s21::AntColonySync ant_colony(graph, count_colony, size_colony);
-//   // ASSERT_EQ(ant_colony.Solve().distance, std::numeric_limits<double>::infinity());
-// }
-
 
 TEST(AntColonySyncTest, SingleVertexGraph) {
   s21::Graph graph(kMatrix_1_1);
@@ -77,11 +68,11 @@ TEST(AntColonySyncTest, TwoVertexGraph) {
 
 }
 
-TEST(AntColonySyncTest, NotSquareGraph) {
+TEST(AntColonySyncTest, NotSquareGraphNoCheckLeaks) {
   ASSERT_THROW(s21::Graph graph(kMatrix_3_2), std::invalid_argument);
 }
 
-TEST(AntColonySyncTest, SetNotSquareGraph) {
+TEST(AntColonySyncTest, SetNotSquareGraphNoCheckLeaks) {
   s21::Graph graph;
   ASSERT_THROW(graph.SetMatrix(std::move(kMatrix_2_3)), std::invalid_argument);
 }
@@ -104,21 +95,6 @@ TEST(AntColonySyncTest, LargeGraph) {
   ASSERT_GT(result.distance, 250);
 }
 
-// TEST(AntColonySyncTest, MultipleRunsGraphNoCheckLeaks) {
-//   s21::Graph graph(kMatrix_11_11);
-//   s21::AntColonySync ant_colony(graph, count_colony, size_colony);
-  
-
-//   for (size_t i = 0; i < 50; ++i) {
-//     s21::TsmResult result = ant_colony.Solve();
-//     ASSERT_EQ(result.vertices.size(), graph.GetSize() + 1);
-//     ASSERT_LT(result.distance, 270);
-//     ASSERT_GT(result.distance, 250);
-//   }
-// }
-
-
-
 TEST(AntColonyAyncTest, SingleVertexGraph) {
   s21::Graph graph(kMatrix_1_1);
   s21::AntColonyAsync ant_colony(graph, count_colony, size_colony);
@@ -137,7 +113,7 @@ TEST(AntColonyAsyncTest, TwoVertexGraph) {
   ASSERT_EQ(result.distance, 4);
 }
 
-TEST(AntColonyAsyncTest, NotSquareGraph) {
+TEST(AntColonyAsyncTest, NotSquareGraphNoCheckLeaks) {
   ASSERT_THROW(s21::Graph graph(std::move(kMatrix_3_2)), std::invalid_argument);
 }
 
@@ -160,15 +136,3 @@ TEST(AntColonyAsyncTest, LargeGraph) {
   ASSERT_GT(result.distance, 250);
 }
 
-// TEST(AntColonyAsyncTest, MultipleRunsGraphNoCheck_Leaks) {
-//   s21::Graph graph(kMatrix_11_11);
-//   s21::AntColonyAsync ant_colony(graph, count_colony, size_colony);
-  
-
-//   for (size_t i = 0; i < 10; ++i) {
-//     s21::TsmResult result = ant_colony.Solve();
-//     ASSERT_EQ(result.vertices.size(), graph.GetSize() + 1);
-//     ASSERT_LT(result.distance, 270);
-//     ASSERT_GT(result.distance, 250);
-//   }
-// }

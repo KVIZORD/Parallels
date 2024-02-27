@@ -69,6 +69,10 @@ std::vector<double> Gauss::BackSubstitution(const Matrix &matrix) {
 
 std::vector<double> Gauss::SolveAsync(Matrix matrix,
                                       std::size_t threads_count) {
+  if (threads_count == 0) {
+    throw std::invalid_argument("Incorrect threads count");
+  }
+
   row_processed_.resize(matrix.size(), false);
   col_processed_.resize(matrix.size(), 0);
 

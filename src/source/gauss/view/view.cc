@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <random>
 
 namespace s21 {
 View::View(Controller &controller) : controller_(controller) {}
@@ -129,11 +130,14 @@ void View::FillMatrixWithRandomValues() {
   std::cout << "Input number of unknowns:" << std::endl;
   size_t size = ReadNumber();
 
+  std::random_device rd;
+  std::mt19937 random(rd());
+
   matrix_.resize(size);
   for (size_t i = 0; i < size; ++i) {
     matrix_[i].resize(size + 1);
     for (size_t j = 0; j < size + 1; ++j) {
-      matrix_[i][j] = rand() % 1000;
+      matrix_[i][j] = random();
     }
   }
 }
@@ -145,6 +149,8 @@ void View::CompareSolutionsSLAE() const {
 
   std::cout << "Input the number of repetitions:" << std::endl;
   size_t count = ReadNumber();
+  std::cout << "Input the number of threads:" << std::endl;
+  size_t threads_count = ReadNumber();
 
   std::chrono::milliseconds time_sync;
   std::chrono::milliseconds time_async;
@@ -153,7 +159,7 @@ void View::CompareSolutionsSLAE() const {
 
   auto begin = std::chrono::steady_clock::now();
   for (size_t i = 0; i < count; ++i) {
-    async_result = controller_.SolveGauseAsync(matrix_);
+    async_result = controller_.SolveGauseAsync(matrix_, threads_count);
   }
   auto end = std::chrono::steady_clock::now();
   time_async =

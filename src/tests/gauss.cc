@@ -1,5 +1,6 @@
-#include "common_tests.h"
 #include "gauss/model/gauss.h"
+#include "common_tests.h"
+#include <stdexcept>
 
 namespace s21 {
 
@@ -133,6 +134,19 @@ TEST(GaussAsync, ZeroesOnMainDiagonal) {
   for (size_t i = 0; i < expected_result.size(); ++i) {
     ASSERT_NEAR(result[i], expected_result[i], kEpsilon);
   }
+}
+
+TEST(GaussAsync, ThreadsCountIsZeroNoCheckLeaks) {
+  std::vector<std::vector<double>> matrix = {{0, 3, 5, 21, 32, 443},
+                                             {2, 0, 5, 43, 36, 41},
+                                             {3, 6, 0, 21, 62, 44},
+                                             {5, 7, 43, 0, 32, 63},
+                                             {6, 3, 5, 15, 0, 13}};
+  std::vector<double> expected_result = {-7985567.0 / 57522, 5002658.0 / 28761,
+                                         153761.0 / 95870, 6061319.0 / 287610,
+                                         -1586069.0 / 95870};
+
+  ASSERT_THROW(Gauss().SolveAsync(matrix, 0), std::invalid_argument);
 }
 
 } // namespace s21
