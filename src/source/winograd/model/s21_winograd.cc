@@ -178,63 +178,67 @@ Matrix Winograd::MulMatrixConveyorWinograd() {
   Matrix result(a_rows_, b_cols_);
   std::condition_variable cv_first_stage;
   std::condition_variable cv_second_stage;
-  std::queue<size_t> row_index;  // очередь для 2 стадии
-  std::queue<std::pair<size_t, size_t>> element_index;  // очередь для 3 стадии
-
-  std::thread t1([&]() {
-    for (size_t i = 0; i < a_rows_; ++i) {
-      auto rf = RowFactorElement(i);
-      row_factor[i] = std::move(rf);
-      std::unique_lock<std::mutex> ul(w_mutex);
-      row_index.push(i);
-      cv_first_stage.notify_one();
-    }
-  });
+  std::queue<size_t> row_index;
+  std::queue<std::pair<size_t, size_t>> element_index;
 
   std::mutex third_task;
-  size_t counter_t2{0};
-  size_t counter_t3{0};
-  size_t c = 0;
-  std::thread t2([&]() {
-    while (true) {
-      auto r = GetFromQueue(row_index, w_mutex, cv_first_stage);
-      for (size_t j = 0; j < c; ++j) {
-        ++counter_t2;
-        std::unique_lock<std::mutex> lock(third_task);
-        element_index.push(std::make_pair(r, j));
-        cv_second_stage.notify_one();
-      }
-      column_factor[c] = ColumnFactorElement(c);
-      for (size_t i = 0; i < r; ++i) {
-        ++counter_t2;
-        std::unique_lock<std::mutex> lock(third_task);
-        element_index.push(std::make_pair(i, c));
-        cv_second_stage.notify_one();
-      }
-      ++counter_t2;
-      {
-        std::unique_lock<std::mutex> lock(third_task);
-        element_index.push(std::make_pair(r, c));
-      }
-      cv_second_stage.notify_one();
-      ++c;
-      if (counter_t2 >= a_rows_ * b_cols_) break;
-    }
-  });
-
-  std::thread t3([&]() {
-    while (true) {
-      auto index = GetFromQueue(element_index, third_task, cv_second_stage);
-      result(index.first, index.second) = CalculateMatrixElement(
-          index.first, index.second, row_factor, column_factor);
-      if (++counter_t3 >= a_rows_ * b_cols_) break;
-    }
-  });
+  std::thread t1([&]() { CalcStepOneConveyorWinograd(row_factor, row_index, cv_first_stage); });
+  std::thread t2([&]() { CalcStepTwoConveyorWinograd(column_factor, row_index, element_index, cv_first_stage, cv_second_stage, third_task); });
+  std::thread t3([&]() { CalcStepThreeConveyorWinograd(result, row_factor, column_factor, element_index, cv_second_stage, third_task); });
 
   t1.join();
   t2.join();
   t3.join();
   return result;
+}
+
+void Winograd::CalcStepOneConveyorWinograd(Vector& row_factor, std::queue<size_t>& row_index, std::condition_variable& cv_first_stage) {
+  for (size_t i = 0; i < a_rows_; ++i) {
+    auto rf = RowFactorElement(i);
+    row_factor[i] = std::move(rf);
+    std::unique_lock<std::mutex> ul(w_mutex);
+    row_index.push(i);
+    cv_first_stage.notify_one();
+  }
+}
+
+void Winograd::CalcStepTwoConveyorWinograd(Vector& column_factor, std::queue<size_t>& row_index, std::queue<std::pair<size_t, size_t>>& element_index, std::condition_variable& cv_first_stage, std::condition_variable& cv_second_stage, std::mutex& third_task) {
+  size_t counter_t2{0};
+  size_t col = 0;
+  while (true) {
+    auto r = GetFromQueue(row_index, w_mutex, cv_first_stage);
+    for (size_t j = 0; j < col; ++j) {
+      ++counter_t2;
+      std::unique_lock<std::mutex> lock(third_task);
+      element_index.push(std::make_pair(r, j));
+      cv_second_stage.notify_one();
+    }
+    column_factor[col] = ColumnFactorElement(col);
+    for (size_t i = 0; i < r; ++i) {
+      ++counter_t2;
+      std::unique_lock<std::mutex> lock(third_task);
+      element_index.push(std::make_pair(i, col));
+      cv_second_stage.notify_one();
+    }
+    ++counter_t2;
+    {
+      std::unique_lock<std::mutex> lock(third_task);
+      element_index.push(std::make_pair(r, col));
+    }
+    cv_second_stage.notify_one();
+    ++col;
+    if (counter_t2 >= a_rows_ * b_cols_) break;
+  }
+}
+
+void Winograd::CalcStepThreeConveyorWinograd(Matrix& result, Vector& row_factor, Vector& column_factor, std::queue<std::pair<size_t, size_t>>& element_index, std::condition_variable& cv_second_stage, std::mutex& third_task) {
+  size_t counter_t3{0};
+  while (true) {
+    auto index = GetFromQueue(element_index, third_task, cv_second_stage);
+    result(index.first, index.second) = CalculateMatrixElement(
+        index.first, index.second, row_factor, column_factor);
+    if (++counter_t3 >= a_rows_ * b_cols_) break;
+  }
 }
 
 template <typename T>

@@ -45,6 +45,9 @@ class Winograd {
   template <typename T>
   T GetFromQueue(std::queue<T>& q, std::mutex& mtx,
                  std::condition_variable& cv);
+  void CalcStepOneConveyorWinograd(Vector& row_factor, std::queue<size_t>& row_index, std::condition_variable& cv_first_stage);
+  void CalcStepTwoConveyorWinograd(Vector& column_factor, std::queue<size_t>& row_index, std::queue<std::pair<size_t, size_t>>& element_index, std::condition_variable& cv_first_stage, std::condition_variable& cv_second_stage, std::mutex& third_task);
+  void CalcStepThreeConveyorWinograd(Matrix& result, Vector& row_factor, Vector& column_factor, std::queue<std::pair<size_t, size_t>>& element_index, std::condition_variable& cv_second_stage, std::mutex& third_task);
 };
 
 }  // namespace s21
