@@ -182,9 +182,17 @@ Matrix Winograd::MulMatrixConveyorWinograd() {
   std::queue<std::pair<size_t, size_t>> element_index;
 
   std::mutex third_task;
-  std::thread t1([&]() { CalcStepOneConveyorWinograd(row_factor, row_index, cv_first_stage); });
-  std::thread t2([&]() { CalcStepTwoConveyorWinograd(column_factor, row_index, element_index, cv_first_stage, cv_second_stage, third_task); });
-  std::thread t3([&]() { CalcStepThreeConveyorWinograd(result, row_factor, column_factor, element_index, cv_second_stage, third_task); });
+  std::thread t1([&]() {
+    CalcStepOneConveyorWinograd(row_factor, row_index, cv_first_stage);
+  });
+  std::thread t2([&]() {
+    CalcStepTwoConveyorWinograd(column_factor, row_index, element_index,
+                                cv_first_stage, cv_second_stage, third_task);
+  });
+  std::thread t3([&]() {
+    CalcStepThreeConveyorWinograd(result, row_factor, column_factor,
+                                  element_index, cv_second_stage, third_task);
+  });
 
   t1.join();
   t2.join();
@@ -192,7 +200,9 @@ Matrix Winograd::MulMatrixConveyorWinograd() {
   return result;
 }
 
-void Winograd::CalcStepOneConveyorWinograd(Vector& row_factor, std::queue<size_t>& row_index, std::condition_variable& cv_first_stage) {
+void Winograd::CalcStepOneConveyorWinograd(
+    Vector& row_factor, std::queue<size_t>& row_index,
+    std::condition_variable& cv_first_stage) {
   for (size_t i = 0; i < a_rows_; ++i) {
     auto rf = RowFactorElement(i);
     row_factor[i] = std::move(rf);
@@ -202,7 +212,11 @@ void Winograd::CalcStepOneConveyorWinograd(Vector& row_factor, std::queue<size_t
   }
 }
 
-void Winograd::CalcStepTwoConveyorWinograd(Vector& column_factor, std::queue<size_t>& row_index, std::queue<std::pair<size_t, size_t>>& element_index, std::condition_variable& cv_first_stage, std::condition_variable& cv_second_stage, std::mutex& third_task) {
+void Winograd::CalcStepTwoConveyorWinograd(
+    Vector& column_factor, std::queue<size_t>& row_index,
+    std::queue<std::pair<size_t, size_t>>& element_index,
+    std::condition_variable& cv_first_stage,
+    std::condition_variable& cv_second_stage, std::mutex& third_task) {
   size_t counter_t2{0};
   size_t col = 0;
   while (true) {
@@ -231,7 +245,10 @@ void Winograd::CalcStepTwoConveyorWinograd(Vector& column_factor, std::queue<siz
   }
 }
 
-void Winograd::CalcStepThreeConveyorWinograd(Matrix& result, Vector& row_factor, Vector& column_factor, std::queue<std::pair<size_t, size_t>>& element_index, std::condition_variable& cv_second_stage, std::mutex& third_task) {
+void Winograd::CalcStepThreeConveyorWinograd(
+    Matrix& result, Vector& row_factor, Vector& column_factor,
+    std::queue<std::pair<size_t, size_t>>& element_index,
+    std::condition_variable& cv_second_stage, std::mutex& third_task) {
   size_t counter_t3{0};
   while (true) {
     auto index = GetFromQueue(element_index, third_task, cv_second_stage);
