@@ -20,7 +20,6 @@ target_link_libraries(${PROJECT_NAME} GTest::gtest_main)
 target_include_directories(${PROJECT_NAME} PUBLIC ${RELATIVE_HEADER_DIR})
 
 include(GoogleTest)
-add_definitions(-DSIMPLE_NAVIGATOR_ASSETS_DIR="${ASSETS_DIR}")
 gtest_discover_tests(${PROJECT_NAME})
 
 # Report

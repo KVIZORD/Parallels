@@ -8,14 +8,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_compile_options(-Wall -Wextra -pedantic -Werror)
 
 if(CMAKE_BUILD_TYPE MATCHES "^Debug")
-  add_compile_options(-g -O0)
-else()
-  add_compile_options(-O0 -DNDEBUG)
+  add_compile_options(-g)
 endif()
 
 # Directories
 set(BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/source)
+set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(ANT_COLONY_DIR ${SOURCE_DIR}/ant_colony)
 set(GAUSS_DIR ${SOURCE_DIR}/gauss)
 set(WINOGRAD_DIR ${SOURCE_DIR}/winograd)
@@ -45,7 +43,6 @@ target_include_directories(winograd PUBLIC ${RELATIVE_HEADER_DIR})
 add_custom_target(format COMMAND clang-format --style=Google -i --verbose ${ALL_SOURCES})
 add_custom_target(stylecheck COMMAND clang-format --style=Google -n --verbose ${ALL_SOURCES})
 add_custom_target(cppcheck COMMAND cppcheck --language=c++ --enable=all --suppress=missingInclude --inconclusive ${ANT_COLONY_SOURCE} ${GAUSS_SOURCE} ${WINOGRAD_SOURCE})
-
 
 enable_testing()
 add_subdirectory(${TEST_DIR})
